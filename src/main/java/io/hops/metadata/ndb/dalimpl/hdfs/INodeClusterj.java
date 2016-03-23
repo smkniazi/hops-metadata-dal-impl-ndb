@@ -169,6 +169,11 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
     long getSize();
 
     void setSize(long size);
+
+    @Column(name = FILE_STORED_IN_DB)
+    byte getFileStoredInDd();
+
+    void setFileStoredInDd(byte isFileStoredInDB);
   }
 
   private ClusterjConnector connector = ClusterjConnector.getInstance();
@@ -450,7 +455,7 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
         NdbBoolean.convert(persistable.getSubtreeLocked()),
         persistable.getSubtreeLockOwner(),
         NdbBoolean.convert(persistable.getMetaEnabled()),
-        persistable.getSize());
+        persistable.getSize(), NdbBoolean.convert(persistable.getFileStoredInDd()));
     return node;
   }
 
@@ -475,6 +480,8 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
     persistable.setSubtreeLockOwner(inode.getSubtreeLockOwner());
     persistable.setMetaEnabled(NdbBoolean.convert(inode.isMetaEnabled()));
     persistable.setSize(inode.getFileSize());
+    persistable.setFileStoredInDd(NdbBoolean.convert(inode.isFileStoredInDB()));
+
   }
 
   private void explain(HopsQuery<InodeDTO> query) {
