@@ -35,6 +35,7 @@ import io.hops.metadata.hdfs.dal.CorruptReplicaDataAccess;
 import io.hops.metadata.hdfs.dal.EncodingJobsDataAccess;
 import io.hops.metadata.hdfs.dal.EncodingStatusDataAccess;
 import io.hops.metadata.hdfs.dal.ExcessReplicaDataAccess;
+import io.hops.metadata.hdfs.dal.FileInodeDataDataAccess;
 import io.hops.metadata.hdfs.dal.GroupDataAccess;
 import io.hops.metadata.hdfs.dal.INodeAttributesDataAccess;
 import io.hops.metadata.hdfs.dal.INodeDataAccess;
@@ -205,7 +206,6 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
   /**
    * begin a transaction.
    *
-   * @param name
    * @throws io.hops.exception.StorageException
    */
   @Override
@@ -275,7 +275,7 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
   public boolean formatYarnStorage() throws StorageException {
     return formatYarn(true);
   }
-  
+
   @Override
   public boolean formatStorage(Class<? extends EntityDataAccess>... das)
       throws StorageException {
@@ -353,6 +353,8 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
       cls = BlockChecksumClusterj.BlockChecksumDto.class;
     } else if (className == OngoingSubTreeOpsDataAccess.class) {
       cls = OnGoingSubTreeOpsClusterj.OnGoingSubTreeOpsDTO.class;
+    } else if (className == FileInodeDataDataAccess.class) {
+      cls = FileInodeDataClusterj.FileInodeDataDTO.class;
     }
 
     HopsSession session = obtainSession();
@@ -372,7 +374,7 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
   
   private boolean formatYarn(boolean transactional) throws StorageException{
     return format(transactional,
-    RPCDataAccess.class, HeartBeatRPCDataAccess.class,
+        RPCDataAccess.class, HeartBeatRPCDataAccess.class,
         AllocateRPCDataAccess.class,
         ApplicationStateDataAccess.class,
         UpdatedNodeDataAccess.class,
@@ -413,7 +415,8 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
   
   private boolean formatHDFS(boolean transactional) throws StorageException{
     return format(transactional,
-        INodeDataAccess.class, BlockInfoDataAccess.class, LeaseDataAccess.class,
+        INodeDataAccess.class, FileInodeDataDataAccess.class,
+        BlockInfoDataAccess.class, LeaseDataAccess.class,
         LeasePathDataAccess.class, ReplicaDataAccess.class,
         ReplicaUnderConstructionDataAccess.class,
         InvalidateBlockDataAccess.class, ExcessReplicaDataAccess.class,
@@ -460,6 +463,8 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
           if (e == INodeDataAccess.class) {
             MysqlServerConnector
                 .truncateTable(transactional, io.hops.metadata.hdfs.TablesDef.INodeTableDef.TABLE_NAME);
+          } else if(e == FileInodeDataDataAccess.class){
+            MysqlServerConnector.truncateTable(transactional, io.hops.metadata.hdfs.TablesDef.FileInodeData.TABLE_NAME);
           } else if (e == BlockInfoDataAccess.class) {
             MysqlServerConnector
                 .truncateTable(transactional, io.hops.metadata.hdfs.TablesDef.BlockInfoTableDef.TABLE_NAME);
@@ -591,6 +596,13 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
               FiCaSchedulerAppLastScheduledContainerDataAccess.class) {
             truncate(transactional,
                 io.hops.metadata.yarn.TablesDef.FiCaSchedulerAppLastScheduledContainerTableDef.TABLE_NAME);
+          } else if (e == FiCaSchedulerAppLiveContainersDataAccess.class) {
+            truncate(transactional,
+                io.hops.metadata.yarn.TablesDef.FiCaSchedulerAppLiveContainersTableDef.TABLE_NAME);
+          } else if (e ==
+              FiCaSchedulerAppNewlyAllocatedContainersDataAccess.class) {
+            truncate(transactional,
+                io.hops.metadata.yarn.TablesDef.FiCaSchedulerAppNewlyAllocatedContainersTableDef.TABLE_NAME);
           } else if (e == FiCaSchedulerAppReservationsDataAccess.class) {
             truncate(transactional,
                 io.hops.metadata.yarn.TablesDef.FiCaSchedulerAppReservationsTableDef.TABLE_NAME);

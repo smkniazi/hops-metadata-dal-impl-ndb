@@ -6,6 +6,7 @@ import io.hops.metadata.hdfs.TablesDef;
 import io.hops.metadata.hdfs.dal.FileInodeDataDataAccess;
 import io.hops.metadata.hdfs.entity.FileInodeData;
 import io.hops.metadata.ndb.ClusterjConnector;
+import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsSession;
@@ -72,10 +73,6 @@ public class FileInodeDataClusterj
 
   @Override
   public int count() throws StorageException {
-    HopsSession session = connector.obtainSession();
-    HopsQueryBuilder qb = session.getQueryBuilder();
-    HopsQuery<FileInodeDataDTO> query =
-        session.createQuery(qb.createQueryDefinition(FileInodeDataDTO.class));
-    return query.getResultList().size();
+    return MySQLQueryHelper.countAll(TABLE_NAME);
   }
 }
