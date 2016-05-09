@@ -23,10 +23,12 @@ import com.mysql.clusterj.annotation.Index;
 import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import io.hops.exception.HopsUserDoesNotExist;
 import io.hops.exception.StorageException;
 import io.hops.metadata.hdfs.TablesDef;
 import io.hops.metadata.hdfs.dal.INodeDataAccess;
 import io.hops.metadata.hdfs.entity.INode;
+import io.hops.metadata.hdfs.entity.INodeBase;
 import io.hops.metadata.hdfs.entity.INodeIdentifier;
 import io.hops.metadata.hdfs.entity.ProjectedINode;
 import io.hops.metadata.ndb.ClusterjConnector;
@@ -39,6 +41,7 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.util.ByteArray;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -47,6 +50,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<INode> {
 
@@ -441,7 +445,6 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
     return inodes;
   }
 
-
   private INode convert(InodeDTO persistable) {
     INode node = new INode(persistable.getId(), persistable.getName(),
         persistable.getParentId(),
@@ -490,5 +493,6 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
     //      System.out.println("keys " +Arrays.toString(map.keySet().toArray()));
     //      System.out.println("values "+ Arrays.toString(map.values().toArray()));
   }
+
 
 }
