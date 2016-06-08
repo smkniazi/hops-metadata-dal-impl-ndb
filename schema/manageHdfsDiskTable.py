@@ -4,16 +4,16 @@ import os
 import sys
 
 DATA_DISKS = ["/media/ssd/"]
-DATAFILE_SIZE = "2048M"
+DATAFILE_SIZE = "1024M"
 DATAFILES_PER_DISK = 10
 
 LOG_DISKS = ["/media/ssd"]
 LOGFILE_SIZE = "1024M"
 LOGFILES_PER_DISK = 1
 
-CONNECT_STRING = "mysql -uhop -phop -h bbc7 hop_salman -e "
+CONNECT_STRING = "mysql -uhop -phop -P3306 -h bbc2 hop_salman -e "
 
-HDFS_FILE_INODE_DATA_SIZE=16384
+HDFS_FILE_INODE_DATA_SIZE=32768
 
 class bcolors:
     HEADER = '\033[95m'

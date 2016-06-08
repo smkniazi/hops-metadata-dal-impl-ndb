@@ -59,23 +59,7 @@ import io.hops.metadata.hdfs.dal.UserGroupDataAccess;
 import io.hops.metadata.hdfs.dal.VariableDataAccess;
 import io.hops.metadata.ndb.dalimpl.election.HdfsLeaderClusterj;
 import io.hops.metadata.ndb.dalimpl.election.YarnLeaderClusterj;
-import io.hops.metadata.ndb.dalimpl.hdfs.BlockChecksumClusterj;
-import io.hops.metadata.ndb.dalimpl.hdfs.BlockInfoClusterj;
-import io.hops.metadata.ndb.dalimpl.hdfs.CorruptReplicaClusterj;
-import io.hops.metadata.ndb.dalimpl.hdfs.EncodingStatusClusterj;
-import io.hops.metadata.ndb.dalimpl.hdfs.ExcessReplicaClusterj;
-import io.hops.metadata.ndb.dalimpl.hdfs.INodeAttributesClusterj;
-import io.hops.metadata.ndb.dalimpl.hdfs.INodeClusterj;
-import io.hops.metadata.ndb.dalimpl.hdfs.InvalidatedBlockClusterj;
-import io.hops.metadata.ndb.dalimpl.hdfs.LeaseClusterj;
-import io.hops.metadata.ndb.dalimpl.hdfs.LeasePathClusterj;
-import io.hops.metadata.ndb.dalimpl.hdfs.OnGoingSubTreeOpsClusterj;
-import io.hops.metadata.ndb.dalimpl.hdfs.PendingBlockClusterj;
-import io.hops.metadata.ndb.dalimpl.hdfs.QuotaUpdateClusterj;
-import io.hops.metadata.ndb.dalimpl.hdfs.ReplicaClusterj;
-import io.hops.metadata.ndb.dalimpl.hdfs.ReplicaUnderConstructionClusterj;
-import io.hops.metadata.ndb.dalimpl.hdfs.UnderReplicatedBlockClusterj;
-import io.hops.metadata.ndb.dalimpl.hdfs.VariableClusterj;
+import io.hops.metadata.ndb.dalimpl.hdfs.*;
 import io.hops.metadata.ndb.dalimpl.yarn.YarnVariablesClusterJ;
 import io.hops.metadata.ndb.mysqlserver.MysqlServerConnector;
 import io.hops.metadata.ndb.wrapper.HopsSession;
@@ -596,13 +580,6 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
               FiCaSchedulerAppLastScheduledContainerDataAccess.class) {
             truncate(transactional,
                 io.hops.metadata.yarn.TablesDef.FiCaSchedulerAppLastScheduledContainerTableDef.TABLE_NAME);
-          } else if (e == FiCaSchedulerAppLiveContainersDataAccess.class) {
-            truncate(transactional,
-                io.hops.metadata.yarn.TablesDef.FiCaSchedulerAppLiveContainersTableDef.TABLE_NAME);
-          } else if (e ==
-              FiCaSchedulerAppNewlyAllocatedContainersDataAccess.class) {
-            truncate(transactional,
-                io.hops.metadata.yarn.TablesDef.FiCaSchedulerAppNewlyAllocatedContainersTableDef.TABLE_NAME);
           } else if (e == FiCaSchedulerAppReservationsDataAccess.class) {
             truncate(transactional,
                 io.hops.metadata.yarn.TablesDef.FiCaSchedulerAppReservationsTableDef.TABLE_NAME);
