@@ -3,17 +3,21 @@
 import os
 import sys
 
+#DATA_DISKS = ["/media/tmpfs/"]
 DATA_DISKS = ["/media/ssd/"]
-DATAFILE_SIZE = "1024M"
-DATAFILES_PER_DISK = 10
+#DATA_DISKS = ["/tmp/"]
+DATAFILE_SIZE = "4098M"
+DATAFILES_PER_DISK = 24
 
+#LOG_DISKS = ["/media/tmpfs"]
 LOG_DISKS = ["/media/ssd"]
-LOGFILE_SIZE = "1024M"
-LOGFILES_PER_DISK = 1
+#LOG_DISKS = ["/tmp/"]
+LOGFILE_SIZE = "4098M"
+LOGFILES_PER_DISK = 2
 
 CONNECT_STRING = "mysql -uhop -phop -P3306 -h bbc2 hop_salman -e "
 
-HDFS_FILE_INODE_DATA_SIZE=32768
+HDFS_FILE_INODE_DATA_SIZE=4096
 
 class bcolors:
     HEADER = '\033[95m'
@@ -72,7 +76,7 @@ def create():
 
   #Create Table
   printStage("Creating Tables")
-  subCommand = ("CREATE table hdfs_file_inode_data ( inode_id int(11) PRIMARY KEY, data blob(%d) not null ) TABLESPACE ts_1 STORAGE DISK ENGINE ndbcluster"% (HDFS_FILE_INODE_DATA_SIZE))
+  subCommand = ("CREATE table hdfs_file_inode_data ( inode_id int(11) PRIMARY KEY, data varbinary(%d) not null ) TABLESPACE ts_1 STORAGE DISK ENGINE ndbcluster"% (HDFS_FILE_INODE_DATA_SIZE))
   executeSQLCommand(subCommand)
 
 
