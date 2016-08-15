@@ -75,6 +75,11 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
     int getParentId();     // id of the inode
     void setParentId(int parentid);
 
+    @Column(name = IS_DIR)
+    byte getIsDir();     // id of the inode
+    void setIsDir(byte isDir);
+
+
     // Inode
     @Column(name = MODIFICATION_TIME)
     long getModificationTime();
@@ -262,9 +267,9 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
   public List<ProjectedINode> findInodesForSubtreeOperationsWithWriteLock(
       int parentId) throws StorageException {
     final String query = String.format(
-        "SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s FROM %s " +
+        "SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s FROM %s " +
             "WHERE %s=%d LOCK IN SHARE MODE",
-        ID, NAME, PARENT_ID, PERMISSION, USER_ID, GROUP_ID, HEADER, SYMLINK,
+        ID, NAME, PARENT_ID, IS_DIR, PERMISSION, USER_ID, GROUP_ID, HEADER, SYMLINK,
         QUOTA_ENABLED,
         UNDER_CONSTRUCTION, SUBTREE_LOCKED, SUBTREE_LOCK_OWNER, SIZE, TABLE_NAME,
         PARENT_ID, parentId);
@@ -278,7 +283,7 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
       while (result.next()) {
         resultList.add(
             new ProjectedINode(result.getInt(ID), result.getInt(PARENT_ID),
-                result.getString(NAME), result.getShort(PERMISSION),
+                result.getString(NAME), result.getBoolean(IS_DIR), result.getShort(PERMISSION),
                 result.getInt(USER_ID), result.getInt(GROUP_ID),
                 result.getLong(HEADER),
                 result.getString(SYMLINK) == null ? false : true,
@@ -340,12 +345,12 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<InodeDTO> dobj =
         qb.createQueryDefinition(InodeDTO.class);
-    HopsPredicate pred = dobj.get("header").equal(dobj.param("isDirParam"));
+    HopsPredicate pred = dobj.get("isDir").equal(dobj.param("isDirParam"));
     HopsPredicate pred2 =
         dobj.get("id").between(dobj.param("startId"), dobj.param("endId"));
     dobj.where(pred.not().and(pred2));
     HopsQuery<InodeDTO> query = session.createQuery(dobj);
-    query.setParameter("isDirParam", 0L);
+    query.setParameter("isDirParam", NdbBoolean.convert(true));
     //FIXME: InodeId is integer
     //startId is inclusive and endId exclusive
     query.setParameter("startId", (int) startId);
@@ -439,7 +444,7 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
 
   private INode convert(InodeDTO persistable) {
     INode node = new INode(persistable.getId(), persistable.getName(),
-        persistable.getParentId(),
+        persistable.getParentId(), NdbBoolean.convert(persistable.getIsDir()),
         NdbBoolean.convert(persistable.getQuotaEnabled()),
         persistable.getModificationTime(), persistable.getATime(),
         persistable.getUserID(), persistable.getGroupID(),
@@ -475,6 +480,7 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
     persistable.setSubtreeLockOwner(inode.getSubtreeLockOwner());
     persistable.setMetaEnabled(NdbBoolean.convert(inode.isMetaEnabled()));
     persistable.setSize(inode.getFileSize());
+    persistable.setIsDir(NdbBoolean.convert(inode.isDirectory()));
   }
 
   private void explain(HopsQuery<InodeDTO> query) {
