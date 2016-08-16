@@ -18,6 +18,7 @@
  */
 package io.hops.metadata.ndb.dalimpl.hdfs;
 
+import com.google.common.collect.Lists;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.Index;
 import com.mysql.clusterj.annotation.PartitionKey;
@@ -39,6 +40,7 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -49,7 +51,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<INode> {
-
+  static final Logger LOG = Logger.getLogger(INodeClusterj.class);
   @Override
   public int countAll() throws StorageException {
     return MySQLQueryHelper.countAll(TABLE_NAME);
@@ -186,7 +188,9 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
   private MysqlServerConnector mysqlConnector =
       MysqlServerConnector.getInstance();
   private final static int NOT_FOUND_ROW = -1000;
-  
+  private final boolean CACHE_ROOT_INODE = true;
+  private INode rootINode = null;
+
   @Override
   public void prepare(Collection<INode> removed, Collection<INode> newEntries,
       Collection<INode> modified) throws StorageException {
@@ -374,14 +378,20 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
       throws StorageException {
     HopsSession session = connector.obtainSession();
 
+    if(canReadCachedRootINode(name, parentId)){
+      LOG.debug("GET Cached Root INode");
+      return rootINode;
+    }
+
     Object[] pk = new Object[3];
     pk[0] = parentId;
     pk[1] = name;
-    pk[2] = parentId;
+    pk[2] = partitionId;
 
     InodeDTO result = session.find(InodeDTO.class, pk);
     if (result != null) {
       INode inode = convert(result);
+      setCachedRoot(inode);
       session.release(result);
       return inode;
     } else {
@@ -393,8 +403,10 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
   public List<INode> getINodesPkBatched(String[] names, int[] parentIds, int[] partitionIds)
       throws StorageException {
     HopsSession session = connector.obtainSession();
+    boolean canReadCachedRoot = canReadCachedRootINode(names[0], parentIds[0]);
+
     List<InodeDTO> dtos = new ArrayList<InodeDTO>();
-    for (int i = 0; i < names.length; i++) {
+    for (int i = (canReadCachedRoot ? 1 : 0); i < names.length; i++) {
       InodeDTO dto = session
           .newInstance(InodeDTO.class, new Object[]{parentIds[i], names[i], partitionIds[i]});
       dto.setId(NOT_FOUND_ROW);
@@ -404,9 +416,32 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
     session.flush();
     List<INode> inodeList = convert(dtos);
     session.release(dtos);
+    if(canReadCachedRoot){
+      LOG.debug("GET Cached Root INode");
+      List<INode> inodeListWithRoot = Lists.newArrayListWithCapacity
+          (inodeList.size() + 1);
+      inodeListWithRoot.add(rootINode);
+      inodeListWithRoot.addAll(inodeList);
+      return inodeListWithRoot;
+    }
     return inodeList;
   }
-  
+
+  private boolean canReadCachedRootINode(String name, int parentId){
+    return name.equals("") && parentId == 0 && rootINode != null && CACHE_ROOT_INODE ;
+  }
+
+  private void setCachedRoot(INode inode){
+    if(isRoot(inode) && CACHE_ROOT_INODE ){
+      LOG.debug("SET Cached Root INode");
+      rootINode = inode;
+    }
+  }
+
+  private boolean isRoot(INode inode){
+    return inode.getName().equals("") && inode.getParentId() == 0 && inode
+        .getId() == 1;
+  }
   @Override
   public List<INodeIdentifier> getAllINodeFiles(long startId, long endId)
       throws StorageException {
