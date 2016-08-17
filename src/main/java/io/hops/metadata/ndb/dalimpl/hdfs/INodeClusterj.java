@@ -46,9 +46,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<INode> {
   static final Logger LOG = Logger.getLogger(INodeClusterj.class);
@@ -58,17 +56,12 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
   }
 
   @PersistenceCapable(table = TABLE_NAME)
-  @PartitionKey(column = PARENT_ID)
+  @PartitionKey(column = PARTITION_ID)
   public interface InodeDTO {
-    @Column(name = ID)
-    @Index(name = "inode_idx")
-    int getId();     // id of the inode
-    void setId(int id);
-
     @PrimaryKey
-    @Column(name = NAME)
-    String getName();     //name of the inode
-    void setName(String name);
+    @Column(name = PARTITION_ID)
+    int getPartitionId();
+    void setPartitionId(int partitionId);
 
     //id of the parent inode
     @PrimaryKey
@@ -77,110 +70,96 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
     int getParentId();     // id of the inode
     void setParentId(int parentid);
 
-    //id of the parent inode
     @PrimaryKey
-    @Column(name = PARTITION_ID)
-    int getPartitionId();     // id of the inode
-    void setPartitionId(int partitionId);
+    @Column(name = NAME)
+    String getName();     //name of the inode
+    void setName(String name);
+
+    @Column(name = ID)
+    @Index(name = "inode_idx")
+    int getId();     // id of the inode
+    void setId(int id);
 
     @Column(name = IS_DIR)
-    byte getIsDir();     // id of the inode
+    byte getIsDir();
     void setIsDir(byte isDir);
-
 
     // Inode
     @Column(name = MODIFICATION_TIME)
     long getModificationTime();
-
     void setModificationTime(long modificationTime);
 
     // Inode
     @Column(name = ACCESS_TIME)
     long getATime();
-
     void setATime(long modificationTime);
 
     // Inode
     @Column(name = USER_ID)
     int getUserID();
-
     void setUserID(int userID);
 
     // Inode
     @Column(name = GROUP_ID)
     int getGroupID();
-
     void setGroupID(int groupID);
 
     // Inode
     @Column(name = PERMISSION)
     short getPermission();
-
     void setPermission(short permission);
 
     // InodeFileUnderConstruction
     @Column(name = CLIENT_NAME)
     String getClientName();
-
     void setClientName(String isUnderConstruction);
 
     // InodeFileUnderConstruction
     @Column(name = CLIENT_MACHINE)
     String getClientMachine();
-
     void setClientMachine(String clientMachine);
 
     @Column(name = CLIENT_NODE)
     String getClientNode();
-
     void setClientNode(String clientNode);
 
     //  marker for InodeFile
     @Column(name = GENERATION_STAMP)
     int getGenerationStamp();
-
     void setGenerationStamp(int generation_stamp);
 
     // InodeFile
     @Column(name = HEADER)
     long getHeader();
-
     void setHeader(long header);
 
     //INodeSymlink
     @Column(name = SYMLINK)
     String getSymlink();
-
     void setSymlink(String symlink);
 
     @Column(name = QUOTA_ENABLED)
     byte getQuotaEnabled();
-
     void setQuotaEnabled(byte quotaEnabled);
 
     @Column(name = UNDER_CONSTRUCTION)
     boolean getUnderConstruction();
-
     void setUnderConstruction(boolean underConstruction);
 
     @Column(name = SUBTREE_LOCKED)
     byte getSubtreeLocked();
-
     void setSubtreeLocked(byte locked);
 
     @Column(name = SUBTREE_LOCK_OWNER)
     long getSubtreeLockOwner();
-
     void setSubtreeLockOwner(long leaderId);
 
     @Column(name = META_ENABLED)
     byte getMetaEnabled();
-
     void setMetaEnabled(byte metaEnabled);
 
     @Column(name = SIZE)
     long getSize();
-
     void setSize(long size);
   }
 
@@ -199,9 +178,9 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
     List<InodeDTO> deletions = new ArrayList<InodeDTO>();
     for (INode inode : removed) {
       Object[] pk = new Object[3];
-      pk[0] = inode.getParentId();
-      pk[1] = inode.getName();
-      pk[2] = inode.getPartitionId();
+      pk[0] = inode.getPartitionId();
+      pk[1] = inode.getParentId();
+      pk[2] = inode.getName();
       InodeDTO persistable = session.newInstance(InodeDTO.class, pk);
       deletions.add(persistable);
     }
@@ -282,12 +261,14 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<InodeDTO> dobj =
         qb.createQueryDefinition(InodeDTO.class);
-    HopsPredicate pred1 = dobj.get("parentId").equal(dobj.param("parentIDParam"));
-    HopsPredicate pred2 = dobj.get("partitionId").equal(dobj.param("partitionIDParam"));
+    HopsPredicate pred1 = dobj.get("partitionId").equal(dobj.param("partitionIDParam"));
+    HopsPredicate pred2 = dobj.get("parentId").equal(dobj.param("parentIDParam"));
     dobj.where(pred1.and(pred2));
     HopsQuery<InodeDTO> query = session.createQuery(dobj);
-    query.setParameter("parentIDParam", parentId);
     query.setParameter("partitionIDParam", partitionId);
+    query.setParameter("parentIDParam", parentId);
+
+    explain(query);
 
     List<InodeDTO> results = query.getResultList();
     List<INode> inodeList = convert(results);
@@ -384,9 +365,9 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
     }
 
     Object[] pk = new Object[3];
-    pk[0] = parentId;
-    pk[1] = name;
-    pk[2] = partitionId;
+    pk[0] = partitionId;
+    pk[1] = parentId;
+    pk[2] = name;
 
     InodeDTO result = session.find(InodeDTO.class, pk);
     if (result != null) {
@@ -408,7 +389,7 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
     List<InodeDTO> dtos = new ArrayList<InodeDTO>();
     for (int i = (canReadCachedRoot ? 1 : 0); i < names.length; i++) {
       InodeDTO dto = session
-          .newInstance(InodeDTO.class, new Object[]{parentIds[i], names[i], partitionIds[i]});
+          .newInstance(InodeDTO.class, new Object[]{partitionIds[i], parentIds[i],names[i]});
       dto.setId(NOT_FOUND_ROW);
       dto = session.load(dto);
       dtos.add(dto);
@@ -590,10 +571,16 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
   }
 
   private void explain(HopsQuery<InodeDTO> query) {
-    //      Map<String,Object> map = query.explain();
-    //      System.out.println("Explain");
-    //      System.out.println("keys " +Arrays.toString(map.keySet().toArray()));
-    //      System.out.println("values "+ Arrays.toString(map.values().toArray()));
+//    Map<String, Object> map = null;
+//    try {
+//      map = query.explain();
+//      System.out.println("Explain");
+//      System.out.println("keys " + Arrays.toString(map.keySet().toArray()));
+//      System.out.println("values " + Arrays.toString(map.values().toArray()));
+//
+//    } catch (StorageException e) {
+//      e.printStackTrace();
+//    }
   }
 
 }
