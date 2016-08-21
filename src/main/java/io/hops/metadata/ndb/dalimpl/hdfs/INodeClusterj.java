@@ -167,7 +167,7 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
   private MysqlServerConnector mysqlConnector =
       MysqlServerConnector.getInstance();
   private final static int NOT_FOUND_ROW = -1000;
-  private final boolean CACHE_ROOT_INODE = true;
+  private final boolean CACHE_ROOT_INODE = false;
   private INode rootINode = null;
 
   @Override
@@ -220,7 +220,7 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
     List<InodeDTO> results = query.getResultList();
 
     if (results.size() > 1) {
-      throw new StorageException("Only one record was expected");
+      throw new StorageException("Fetching inode by id:"+inodeId+". Only one record was expected. Found: "+results.size());
     }
     
     if (results.size() == 1) {
@@ -493,17 +493,25 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
   }
   
   @Override
-  public boolean hasChildren(int parentId) throws StorageException {
+  public boolean hasChildren(int parentId, boolean areChildRandomlyPartitioned) throws StorageException {
     HopsSession session = connector.obtainSession();
 
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<InodeDTO> dobj =
         qb.createQueryDefinition(InodeDTO.class);
-    HopsPredicate pred1 =
-        dobj.get("parentId").equal(dobj.param("parentIDParam"));
-    dobj.where(pred1);
+    HopsPredicate pred1 = dobj.get("parentId").equal(dobj.param("parentIDParam"));
+    HopsPredicate pred2 = dobj.get("partitionId").equal(dobj.param("partitionIDParam"));
+    if(areChildRandomlyPartitioned){
+      dobj.where(pred1);
+    }else{
+      dobj.where(pred2.and(pred1));
+    }
     HopsQuery<InodeDTO> query = session.createQuery(dobj);
+
     query.setParameter("parentIDParam", parentId);
+    if(!areChildRandomlyPartitioned){
+      query.setParameter("partitionIDParam", parentId);
+    }
     query.setLimits(0, 1);
 
     List<InodeDTO> results = query.getResultList();
