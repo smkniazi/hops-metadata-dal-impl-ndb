@@ -358,11 +358,6 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
       throws StorageException {
     HopsSession session = connector.obtainSession();
 
-    if(canReadCachedRootINode(session, name, parentId)){
-      LOG.debug("GET Cached Root INode");
-      return RootINodeCache.getRootINode();
-    }
-
     Object[] pk = new Object[3];
     pk[0] = partitionId;
     pk[1] = parentId;
@@ -382,10 +377,9 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
   public List<INode> getINodesPkBatched(String[] names, int[] parentIds, int[] partitionIds)
       throws StorageException {
     HopsSession session = connector.obtainSession();
-    boolean canReadCachedRoot = canReadCachedRootINode(session, names[0], parentIds[0]);
 
     List<InodeDTO> dtos = new ArrayList<InodeDTO>();
-    for (int i = (canReadCachedRoot ? 1 : 0); i < names.length; i++) {
+    for (int i =  0; i < names.length; i++) {
       InodeDTO dto = session
           .newInstance(InodeDTO.class, new Object[]{partitionIds[i], parentIds[i],names[i]});
       dto.setId(NOT_FOUND_ROW);
@@ -395,28 +389,7 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
     session.flush();
     List<INode> inodeList = convert(dtos);
     session.release(dtos);
-    if(canReadCachedRoot){
-      LOG.debug("GET Cached Root INode");
-      List<INode> inodeListWithRoot = Lists.newArrayListWithCapacity
-          (inodeList.size() + 1);
-      inodeListWithRoot.add(RootINodeCache.getRootINode());
-      inodeListWithRoot.addAll(inodeList);
-      return inodeListWithRoot;
-    }
     return inodeList;
-  }
-
-  private boolean canReadCachedRootINode(HopsSession session, String name, int parentId) {
-    if (name.equals("") && parentId == 0) {
-      if (RootINodeCache.isRootInCache() && session.getCurrentLockMode() == LockMode.READ_COMMITTED) {
-        LOG.debug("Can read root from the cache");
-        return true;
-      }
-      else{
-        LOG.debug("Can NOT read root from the cache");
-      }
-    }
-    return false;
   }
 
   private boolean isRoot(INode inode){
