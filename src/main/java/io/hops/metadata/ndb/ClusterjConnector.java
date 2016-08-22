@@ -205,7 +205,6 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
   /**
    * begin a transaction.
    *
-   * @param name
    * @throws io.hops.exception.StorageException
    */
   @Override

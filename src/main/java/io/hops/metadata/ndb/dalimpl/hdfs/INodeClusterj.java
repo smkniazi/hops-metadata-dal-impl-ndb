@@ -19,6 +19,7 @@
 package io.hops.metadata.ndb.dalimpl.hdfs;
 
 import com.google.common.collect.Lists;
+import com.mysql.clusterj.LockMode;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.Index;
 import com.mysql.clusterj.annotation.PartitionKey;
@@ -167,8 +168,6 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
   private MysqlServerConnector mysqlConnector =
       MysqlServerConnector.getInstance();
   private final static int NOT_FOUND_ROW = -1000;
-  private final boolean CACHE_ROOT_INODE = false;
-  private INode rootINode = null;
 
   @Override
   public void prepare(Collection<INode> removed, Collection<INode> newEntries,
@@ -359,9 +358,9 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
       throws StorageException {
     HopsSession session = connector.obtainSession();
 
-    if(canReadCachedRootINode(name, parentId)){
+    if(canReadCachedRootINode(session, name, parentId)){
       LOG.debug("GET Cached Root INode");
-      return rootINode;
+      return RootINodeCache.getRootINode();
     }
 
     Object[] pk = new Object[3];
@@ -372,7 +371,6 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
     InodeDTO result = session.find(InodeDTO.class, pk);
     if (result != null) {
       INode inode = convert(result);
-      setCachedRoot(inode);
       session.release(result);
       return inode;
     } else {
@@ -384,7 +382,7 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
   public List<INode> getINodesPkBatched(String[] names, int[] parentIds, int[] partitionIds)
       throws StorageException {
     HopsSession session = connector.obtainSession();
-    boolean canReadCachedRoot = canReadCachedRootINode(names[0], parentIds[0]);
+    boolean canReadCachedRoot = canReadCachedRootINode(session, names[0], parentIds[0]);
 
     List<InodeDTO> dtos = new ArrayList<InodeDTO>();
     for (int i = (canReadCachedRoot ? 1 : 0); i < names.length; i++) {
@@ -401,28 +399,31 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
       LOG.debug("GET Cached Root INode");
       List<INode> inodeListWithRoot = Lists.newArrayListWithCapacity
           (inodeList.size() + 1);
-      inodeListWithRoot.add(rootINode);
+      inodeListWithRoot.add(RootINodeCache.getRootINode());
       inodeListWithRoot.addAll(inodeList);
       return inodeListWithRoot;
     }
     return inodeList;
   }
 
-  private boolean canReadCachedRootINode(String name, int parentId){
-    return name.equals("") && parentId == 0 && rootINode != null && CACHE_ROOT_INODE ;
-  }
-
-  private void setCachedRoot(INode inode){
-    if(isRoot(inode) && CACHE_ROOT_INODE ){
-      LOG.debug("SET Cached Root INode");
-      rootINode = inode;
+  private boolean canReadCachedRootINode(HopsSession session, String name, int parentId) {
+    if (name.equals("") && parentId == 0) {
+      if (RootINodeCache.isRootInCache() && session.getCurrentLockMode() == LockMode.READ_COMMITTED) {
+        LOG.debug("Can read root from the cache");
+        return true;
+      }
+      else{
+        LOG.debug("Can NOT read root from the cache");
+      }
     }
+    return false;
   }
 
   private boolean isRoot(INode inode){
     return inode.getName().equals("") && inode.getParentId() == 0 && inode
         .getId() == 1;
   }
+
   @Override
   public List<INodeIdentifier> getAllINodeFiles(long startId, long endId)
       throws StorageException {
@@ -535,7 +536,7 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
   }
 
 
-  private INode convert(InodeDTO persistable) {
+  protected static INode convert(InodeDTO persistable) {
     INode node = new INode(persistable.getId(), persistable.getName(),
         persistable.getParentId(), persistable.getPartitionId(),
         NdbBoolean.convert(persistable.getIsDir()),
@@ -553,7 +554,7 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
     return node;
   }
 
-  private void createPersistable(INode inode, InodeDTO persistable) {
+  protected static void createPersistable(INode inode, InodeDTO persistable) {
     persistable.setId(inode.getId());
     persistable.setName(inode.getName());
     persistable.setParentId(inode.getParentId());

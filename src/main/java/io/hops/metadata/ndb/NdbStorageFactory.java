@@ -77,6 +77,7 @@ import io.hops.metadata.ndb.dalimpl.hdfs.QuotaUpdateClusterj;
 import io.hops.metadata.ndb.dalimpl.hdfs.RepairJobsClusterj;
 import io.hops.metadata.ndb.dalimpl.hdfs.ReplicaClusterj;
 import io.hops.metadata.ndb.dalimpl.hdfs.ReplicaUnderConstructionClusterj;
+import io.hops.metadata.ndb.dalimpl.hdfs.RootINodeCache;
 import io.hops.metadata.ndb.dalimpl.hdfs.SafeBlocksClusterj;
 import io.hops.metadata.ndb.dalimpl.hdfs.SizeLogClusterj;
 import io.hops.metadata.ndb.dalimpl.hdfs.StorageIdMapClusterj;
@@ -216,6 +217,7 @@ public class NdbStorageFactory implements DalStorageFactory {
       ClusterjConnector.getInstance().setConfiguration(conf);
       MysqlServerConnector.getInstance().setConfiguration(conf);
       initDataAccessMap();
+      RootINodeCache.getInstance().start();
     } catch (IOException ex) {
       throw new StorageInitializtionException(ex);
     }
