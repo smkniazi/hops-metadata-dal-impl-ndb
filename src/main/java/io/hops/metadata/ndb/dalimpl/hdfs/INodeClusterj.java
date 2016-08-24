@@ -144,8 +144,8 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
     void setQuotaEnabled(byte quotaEnabled);
 
     @Column(name = UNDER_CONSTRUCTION)
-    boolean getUnderConstruction();
-    void setUnderConstruction(boolean underConstruction);
+    byte getUnderConstruction();
+    void setUnderConstruction(byte underConstruction);
 
     @Column(name = SUBTREE_LOCKED)
     byte getSubtreeLocked();
@@ -278,80 +278,141 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
   @Override
   public List<ProjectedINode> findInodesForSubtreeOperationsWithWriteLockFTIS(
       int parentId) throws StorageException {
-    final String query = String.format(
-        "SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s FROM %s " +
-            "WHERE %s=%d FOR UPDATE",
-        ID, NAME, PARENT_ID, PARTITION_ID, IS_DIR, PERMISSION, USER_ID, GROUP_ID, HEADER, SYMLINK,
-        QUOTA_ENABLED,
-        UNDER_CONSTRUCTION, SUBTREE_LOCKED, SUBTREE_LOCK_OWNER, SIZE, TABLE_NAME,
-        PARENT_ID, parentId);
-    ArrayList<ProjectedINode> resultList;
-    try {
-      Connection conn = mysqlConnector.obtainSession();
-      PreparedStatement s = conn.prepareStatement(query);
-      ResultSet result = s.executeQuery();
-      resultList = new ArrayList<ProjectedINode>();
+    HopsSession session = connector.obtainSession();
 
-      while (result.next()) {
-        resultList.add(
-            new ProjectedINode(result.getInt(ID), result.getInt(PARENT_ID),
-                result.getString(NAME), result.getInt(PARTITION_ID),
-                result.getBoolean(IS_DIR), result.getShort(PERMISSION),
-                result.getInt(USER_ID), result.getInt(GROUP_ID),
-                result.getLong(HEADER),
-                result.getString(SYMLINK) == null ? false : true,
-                result.getBoolean(QUOTA_ENABLED),
-                result.getBoolean(UNDER_CONSTRUCTION),
-                result.getBoolean(SUBTREE_LOCKED),
-                result.getLong(SUBTREE_LOCK_OWNER),
-                result.getLong(SIZE)));
-      }
-    } catch (SQLException ex) {
-      throw HopsSQLExceptionHelper.wrap(ex);
-    } finally {
-      mysqlConnector.closeSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
+    HopsQueryDomainType<InodeDTO> dobj =
+        qb.createQueryDefinition(InodeDTO.class);
+    HopsPredicate pred2 = dobj.get("parentId").equal(dobj.param("parentIDParam"));
+    dobj.where(pred2);
+    HopsQuery<InodeDTO> query = session.createQuery(dobj);
+    query.setParameter("parentIDParam", parentId);
+
+    ArrayList<ProjectedINode> resultList  = new ArrayList<ProjectedINode>();
+    List<InodeDTO> results = query.getResultList();
+    for(InodeDTO inode: results){
+      resultList.add(createProjectedINode(inode));
     }
+    session.release(results);
     return resultList;
   }
+
+  private ProjectedINode createProjectedINode(InodeDTO inode){
+    return new ProjectedINode(inode.getId(),
+              inode.getParentId(),
+              inode.getName(),
+              inode.getPartitionId(),
+              NdbBoolean.convert(inode.getIsDir()),
+              inode.getPermission(),
+              inode.getUserID(),
+              inode.getGroupID(),
+              inode.getHeader(),
+              inode.getSymlink()== null ? false : true,
+              NdbBoolean.convert(inode.getQuotaEnabled()),
+              NdbBoolean.convert(inode.getUnderConstruction()),
+              NdbBoolean.convert(inode.getSubtreeLocked()),
+              inode.getSubtreeLockOwner(),
+              inode.getSize());
+  }
+//  public List<ProjectedINode> findInodesForSubtreeOperationsWithWriteLockFTIS(
+//      int parentId) throws StorageException {
+//    final String query = String.format(
+//        "SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s FROM %s " +
+//            "WHERE %s=%d FOR UPDATE",
+//        ID, NAME, PARENT_ID, PARTITION_ID, IS_DIR, PERMISSION, USER_ID, GROUP_ID, HEADER, SYMLINK,
+//        QUOTA_ENABLED,
+//        UNDER_CONSTRUCTION, SUBTREE_LOCKED, SUBTREE_LOCK_OWNER, SIZE, TABLE_NAME,
+//        PARENT_ID, parentId);
+//    ArrayList<ProjectedINode> resultList;
+//    try {
+//      Connection conn = mysqlConnector.obtainSession();
+//      PreparedStatement s = conn.prepareStatement(query);
+//      ResultSet result = s.executeQuery();
+//      resultList = new ArrayList<ProjectedINode>();
+//
+//      while (result.next()) {
+//        resultList.add(
+//            new ProjectedINode(result.getInt(ID), result.getInt(PARENT_ID),
+//                result.getString(NAME), result.getInt(PARTITION_ID),
+//                result.getBoolean(IS_DIR), result.getShort(PERMISSION),
+//                result.getInt(USER_ID), result.getInt(GROUP_ID),
+//                result.getLong(HEADER),
+//                result.getString(SYMLINK) == null ? false : true,
+//                result.getBoolean(QUOTA_ENABLED),
+//                result.getBoolean(UNDER_CONSTRUCTION),
+//                result.getBoolean(SUBTREE_LOCKED),
+//                result.getLong(SUBTREE_LOCK_OWNER),
+//                result.getLong(SIZE)));
+//      }
+//    } catch (SQLException ex) {
+//      throw HopsSQLExceptionHelper.wrap(ex);
+//    } finally {
+//      mysqlConnector.closeSession();
+//    }
+//    return resultList;
+//  }
 
   @Override
-  public List<ProjectedINode> findInodesForSubtreeOperationsWithWriteLockPPIS(
-      int parentId, int partitionId) throws StorageException {
-    final String query = String.format(
-        "SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s FROM %s " +
-            "WHERE %s=%d and %s=%d FOR UPDATE",
-        ID, NAME, PARENT_ID, PARTITION_ID, IS_DIR, PERMISSION, USER_ID, GROUP_ID, HEADER, SYMLINK,
-        QUOTA_ENABLED,
-        UNDER_CONSTRUCTION, SUBTREE_LOCKED, SUBTREE_LOCK_OWNER, SIZE, TABLE_NAME,
-        PARENT_ID, parentId, PARTITION_ID, partitionId);
-    ArrayList<ProjectedINode> resultList;
-    try {
-      Connection conn = mysqlConnector.obtainSession();
-      PreparedStatement s = conn.prepareStatement(query);
-      ResultSet result = s.executeQuery();
-      resultList = new ArrayList<ProjectedINode>();
 
-      while (result.next()) {
-        resultList.add(
-            new ProjectedINode(result.getInt(ID), result.getInt(PARENT_ID),
-                result.getString(NAME), result.getInt(PARTITION_ID),
-                result.getBoolean(IS_DIR), result.getShort(PERMISSION),
-                result.getInt(USER_ID), result.getInt(GROUP_ID),
-                result.getLong(HEADER),
-                result.getString(SYMLINK) == null ? false : true,
-                result.getBoolean(QUOTA_ENABLED),
-                result.getBoolean(UNDER_CONSTRUCTION),
-                result.getBoolean(SUBTREE_LOCKED),
-                result.getLong(SUBTREE_LOCK_OWNER),
-                result.getLong(SIZE)));
-      }
-    } catch (SQLException ex) {
-      throw HopsSQLExceptionHelper.wrap(ex);
-    } finally {
-      mysqlConnector.closeSession();
+  public List<ProjectedINode> findInodesForSubtreeOperationsWithWriteLockPPIS(
+          int parentId, int partitionId) throws StorageException {
+    HopsSession session = connector.obtainSession();
+
+    HopsQueryBuilder qb = session.getQueryBuilder();
+    HopsQueryDomainType<InodeDTO> dobj =
+        qb.createQueryDefinition(InodeDTO.class);
+    HopsPredicate pred1 = dobj.get("partitionId").equal(dobj.param("partitionIDParam"));
+    HopsPredicate pred2 = dobj.get("parentId").equal(dobj.param("parentIDParam"));
+    dobj.where(pred1.and(pred2));
+    HopsQuery<InodeDTO> query = session.createQuery(dobj);
+    query.setParameter("partitionIDParam", partitionId);
+    query.setParameter("parentIDParam", parentId);
+
+    ArrayList<ProjectedINode> resultList  = new ArrayList<ProjectedINode>();
+    List<InodeDTO> results = query.getResultList();
+    for(InodeDTO inode: results){
+      resultList.add(createProjectedINode(inode));
     }
+    session.release(results);
     return resultList;
   }
+//  public List<ProjectedINode> findInodesForSubtreeOperationsWithWriteLockPPIS(
+//      int parentId, int partitionId) throws StorageException {
+//    final String query = String.format(
+//        "SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s FROM %s " +
+//            "WHERE %s=%d and %s=%d FOR UPDATE",
+//        ID, NAME, PARENT_ID, PARTITION_ID, IS_DIR, PERMISSION, USER_ID, GROUP_ID, HEADER, SYMLINK,
+//        QUOTA_ENABLED,
+//        UNDER_CONSTRUCTION, SUBTREE_LOCKED, SUBTREE_LOCK_OWNER, SIZE, TABLE_NAME,
+//        PARENT_ID, parentId, PARTITION_ID, partitionId);
+//    ArrayList<ProjectedINode> resultList;
+//    try {
+//      Connection conn = mysqlConnector.obtainSession();
+//      PreparedStatement s = conn.prepareStatement(query);
+//      ResultSet result = s.executeQuery();
+//      resultList = new ArrayList<ProjectedINode>();
+//
+//      while (result.next()) {
+//        resultList.add(
+//            new ProjectedINode(result.getInt(ID), result.getInt(PARENT_ID),
+//                result.getString(NAME), result.getInt(PARTITION_ID),
+//                result.getBoolean(IS_DIR), result.getShort(PERMISSION),
+//                result.getInt(USER_ID), result.getInt(GROUP_ID),
+//                result.getLong(HEADER),
+//                result.getString(SYMLINK) == null ? false : true,
+//                result.getBoolean(QUOTA_ENABLED),
+//                result.getBoolean(UNDER_CONSTRUCTION),
+//                result.getBoolean(SUBTREE_LOCKED),
+//                result.getLong(SUBTREE_LOCK_OWNER),
+//                result.getLong(SIZE)));
+//      }
+//    } catch (SQLException ex) {
+//      throw HopsSQLExceptionHelper.wrap(ex);
+//    } finally {
+//      mysqlConnector.closeSession();
+//    }
+//    return resultList;
+//  }
 
   @Override
   public INode findInodeByNameParentIdAndPartitionIdPK(String name, int parentId, int partitionId)
@@ -516,7 +577,7 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
         NdbBoolean.convert(persistable.getQuotaEnabled()),
         persistable.getModificationTime(), persistable.getATime(),
         persistable.getUserID(), persistable.getGroupID(),
-        persistable.getPermission(), persistable.getUnderConstruction(),
+        persistable.getPermission(), NdbBoolean.convert(persistable.getUnderConstruction()),
         persistable.getClientName(), persistable.getClientMachine(),
         persistable.getClientNode(), persistable.getGenerationStamp(),
         persistable.getHeader(), persistable.getSymlink(),
@@ -537,7 +598,7 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
     persistable.setUserID(inode.getUserID());
     persistable.setGroupID(inode.getGroupID());
     persistable.setPermission(inode.getPermission());
-    persistable.setUnderConstruction(inode.isUnderConstruction());
+    persistable.setUnderConstruction(NdbBoolean.convert(inode.isUnderConstruction()));
     persistable.setClientName(inode.getClientName());
     persistable.setClientMachine(inode.getClientMachine());
     persistable.setClientNode(inode.getClientNode());
