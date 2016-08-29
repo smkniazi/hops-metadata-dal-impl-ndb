@@ -279,22 +279,29 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
   public List<ProjectedINode> findInodesForSubtreeOperationsWithWriteLockFTIS(
       int parentId) throws StorageException {
     HopsSession session = connector.obtainSession();
+    try {
+      session.currentTransaction().begin();
+      session.setLockMode(LockMode.EXCLUSIVE);
+      HopsQueryBuilder qb = session.getQueryBuilder();
+      HopsQueryDomainType<InodeDTO> dobj =
+              qb.createQueryDefinition(InodeDTO.class);
+      HopsPredicate pred2 = dobj.get("parentId").equal(dobj.param("parentIDParam"));
+      dobj.where(pred2);
+      HopsQuery<InodeDTO> query = session.createQuery(dobj);
+      query.setParameter("parentIDParam", parentId);
 
-    HopsQueryBuilder qb = session.getQueryBuilder();
-    HopsQueryDomainType<InodeDTO> dobj =
-        qb.createQueryDefinition(InodeDTO.class);
-    HopsPredicate pred2 = dobj.get("parentId").equal(dobj.param("parentIDParam"));
-    dobj.where(pred2);
-    HopsQuery<InodeDTO> query = session.createQuery(dobj);
-    query.setParameter("parentIDParam", parentId);
-
-    ArrayList<ProjectedINode> resultList  = new ArrayList<ProjectedINode>();
-    List<InodeDTO> results = query.getResultList();
-    for(InodeDTO inode: results){
-      resultList.add(createProjectedINode(inode));
+      ArrayList<ProjectedINode> resultList = new ArrayList<ProjectedINode>();
+      List<InodeDTO> results = query.getResultList();
+      for (InodeDTO inode : results) {
+        resultList.add(createProjectedINode(inode));
+      }
+      session.release(results);
+      session.currentTransaction().commit();
+      return resultList;
+    }catch(StorageException e){
+      session.currentTransaction().rollback();
+      throw e;
     }
-    session.release(results);
-    return resultList;
   }
 
   private ProjectedINode createProjectedINode(InodeDTO inode){
@@ -357,24 +364,31 @@ public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<I
   public List<ProjectedINode> findInodesForSubtreeOperationsWithWriteLockPPIS(
           int parentId, int partitionId) throws StorageException {
     HopsSession session = connector.obtainSession();
+    try {
+      session.currentTransaction().begin();
+      session.setLockMode(LockMode.EXCLUSIVE);
+      HopsQueryBuilder qb = session.getQueryBuilder();
+      HopsQueryDomainType<InodeDTO> dobj =
+              qb.createQueryDefinition(InodeDTO.class);
+      HopsPredicate pred1 = dobj.get("partitionId").equal(dobj.param("partitionIDParam"));
+      HopsPredicate pred2 = dobj.get("parentId").equal(dobj.param("parentIDParam"));
+      dobj.where(pred1.and(pred2));
+      HopsQuery<InodeDTO> query = session.createQuery(dobj);
+      query.setParameter("partitionIDParam", partitionId);
+      query.setParameter("parentIDParam", parentId);
 
-    HopsQueryBuilder qb = session.getQueryBuilder();
-    HopsQueryDomainType<InodeDTO> dobj =
-        qb.createQueryDefinition(InodeDTO.class);
-    HopsPredicate pred1 = dobj.get("partitionId").equal(dobj.param("partitionIDParam"));
-    HopsPredicate pred2 = dobj.get("parentId").equal(dobj.param("parentIDParam"));
-    dobj.where(pred1.and(pred2));
-    HopsQuery<InodeDTO> query = session.createQuery(dobj);
-    query.setParameter("partitionIDParam", partitionId);
-    query.setParameter("parentIDParam", parentId);
-
-    ArrayList<ProjectedINode> resultList  = new ArrayList<ProjectedINode>();
-    List<InodeDTO> results = query.getResultList();
-    for(InodeDTO inode: results){
-      resultList.add(createProjectedINode(inode));
+      ArrayList<ProjectedINode> resultList = new ArrayList<ProjectedINode>();
+      List<InodeDTO> results = query.getResultList();
+      for (InodeDTO inode : results) {
+        resultList.add(createProjectedINode(inode));
+      }
+      session.release(results);
+      session.currentTransaction().commit();
+      return resultList;
+    }catch(StorageException e){
+      session.currentTransaction().rollback();
+      throw e;
     }
-    session.release(results);
-    return resultList;
   }
 //  public List<ProjectedINode> findInodesForSubtreeOperationsWithWriteLockPPIS(
 //      int parentId, int partitionId) throws StorageException {
