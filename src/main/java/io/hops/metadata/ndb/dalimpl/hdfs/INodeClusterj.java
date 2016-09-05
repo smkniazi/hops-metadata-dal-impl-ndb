@@ -50,7 +50,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<INode> {
-  static final Logger LOG = Logger.getLogger(INodeClusterj.class);
+//  static final Logger LOG = Logger.getLogger(INodeClusterj.class);
   @Override
   public int countAll() throws StorageException {
     return MySQLQueryHelper.countAll(TABLE_NAME);

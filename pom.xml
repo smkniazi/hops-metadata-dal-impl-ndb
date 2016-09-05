@@ -26,6 +26,7 @@
     <dependency>
       <groupId>com.mysql.ndb</groupId>
       <artifactId>clusterj-hops-fix</artifactId>
+      <!--artifactId>clusterj-part-key-fix</artifactId-->
       <version>7.5.3</version>
     </dependency>
 

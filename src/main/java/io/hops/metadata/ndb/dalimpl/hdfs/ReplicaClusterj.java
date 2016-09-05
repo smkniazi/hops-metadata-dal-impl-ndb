@@ -49,7 +49,6 @@ import java.util.Set;
 
 public class ReplicaClusterj
     implements TablesDef.ReplicaTableDef, ReplicaDataAccess<Replica> {
-  static final Logger LOG = Logger.getLogger(ReplicaClusterj.class);
 
   @PersistenceCapable(table = TABLE_NAME)
   @PartitionKey(column = INODE_ID)
