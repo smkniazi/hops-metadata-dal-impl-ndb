@@ -436,7 +436,7 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
         MetadataLogDataAccess.class, AccessTimeLogDataAccess.class,
         SizeLogDataAccess.class, EncodingJobsDataAccess.class,
         RepairJobsDataAccess.class, UserDataAccess.class, GroupDataAccess.class,
-        UserGroupDataAccess.class);
+        UserGroupDataAccess.class,VariableDataAccess.class);
   }
   
   private boolean formatAll(boolean transactional) throws StorageException {
