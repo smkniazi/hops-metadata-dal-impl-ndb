@@ -115,7 +115,7 @@ public class InvalidatedBlockClusterj implements
     qdt.where(qdt.get("storageId").equal(qdt.param("param")));
     HopsQuery<InvalidateBlocksDTO> query = session.createQuery(qdt);
     query.setParameter("param", storageId);
-    
+
     List<InvalidateBlocksDTO> dtos = query.getResultList();
     List<InvalidatedBlock> ivl = createList(dtos);
     session.release(dtos);
