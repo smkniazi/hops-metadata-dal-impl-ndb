@@ -7,15 +7,15 @@ import sys
 DATA_DISKS = ["/media/ssd/"]
 #DATA_DISKS = ["/tmp/"]
 DATAFILE_SIZE = "4098M"
-DATAFILES_PER_DISK = 24
+DATAFILES_PER_DISK = 1
 
 #LOG_DISKS = ["/media/tmpfs"]
 LOG_DISKS = ["/media/ssd"]
 #LOG_DISKS = ["/tmp/"]
 LOGFILE_SIZE = "4098M"
-LOGFILES_PER_DISK = 2
+LOGFILES_PER_DISK = 1
 
-CONNECT_STRING = "mysql -uhop -phop -P3306 -h bbc2 hop_salman -e "
+CONNECT_STRING = "mysql -uhop -phop -P3306 -h bbc2 hop_salman_sf -e "
 
 HDFS_FILE_INODE_DATA_SIZE=4096
 

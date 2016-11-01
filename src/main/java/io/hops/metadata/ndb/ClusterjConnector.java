@@ -261,6 +261,11 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
   }
 
   @Override
+  public boolean formatHDFSStorage() throws StorageException {
+    return formatHDFS(true);
+  }
+
+  @Override
   public boolean formatStorage(Class<? extends EntityDataAccess>... das)
       throws StorageException {
     return format(true, das);
@@ -355,7 +360,12 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
   public boolean formatYarnStorageNonTransactional() throws StorageException {
     return formatAll(false);
   }
-  
+
+  @Override
+  public boolean formatHDFSStorageNonTransactional() throws StorageException {
+    return formatHDFS(false);
+  }
+
   private boolean formatYarn(boolean transactional) throws StorageException{
     return format(transactional,
         RPCDataAccess.class, HeartBeatRPCDataAccess.class,
@@ -414,7 +424,7 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
         MetadataLogDataAccess.class, AccessTimeLogDataAccess.class,
         SizeLogDataAccess.class, EncodingJobsDataAccess.class,
         RepairJobsDataAccess.class, UserDataAccess.class, GroupDataAccess.class,
-        UserGroupDataAccess.class);
+        UserGroupDataAccess.class,VariableDataAccess.class);
   }
   
   private boolean formatAll(boolean transactional) throws StorageException {
@@ -524,6 +534,8 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
           } else if (e == MetadataLogDataAccess.class) {
             MysqlServerConnector.truncateTable(transactional,
                 io.hops.metadata.hdfs.TablesDef.MetadataLogTableDef.TABLE_NAME);
+            MysqlServerConnector.truncateTable(transactional,
+                io.hops.metadata.hdfs.TablesDef.MetadataLogTableDef.LOOKUP_TABLE_NAME);
           } else if (e == AccessTimeLogDataAccess.class) {
             MysqlServerConnector.truncateTable(transactional,
                 io.hops.metadata.hdfs.TablesDef.AccessTimeLogTableDef.TABLE_NAME);
