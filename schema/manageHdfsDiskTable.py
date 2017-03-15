@@ -4,16 +4,16 @@ import os
 import sys
 
 #DATA_DISKS = ["/media/tmpfs/"]
-DATA_DISKS = ["/media/ssd/"]
-#DATA_DISKS = ["/tmp/"]
-DATAFILE_SIZE = "4098M"
-DATAFILES_PER_DISK = 1
+#DATA_DISKS = ["/var/lib/mysql-cluster/ndb/ndb_data/disk_data/"]
+DATA_DISKS = [""]
+DATAFILE_SIZE = "1024M"
+DATAFILES_PER_DISK = 2
 
 #LOG_DISKS = ["/media/tmpfs"]
-LOG_DISKS = ["/media/ssd"]
-#LOG_DISKS = ["/tmp/"]
-LOGFILE_SIZE = "4098M"
-LOGFILES_PER_DISK = 1
+#LOG_DISKS = ["/var/lib/mysql-cluster/ndb/ndb_data/disk_data/"]
+LOG_DISKS = [""]
+LOGFILE_SIZE = "1024M"
+LOGFILES_PER_DISK = 2
 
 CONNECT_STRING = "mysql -uhop -phop -P3306 -h bbc2 hop_salman_sf -e "
 
@@ -44,18 +44,18 @@ def create():
   logGroupCreated = False
   for fileIndex in range(0, LOGFILES_PER_DISK):
     for disk in LOG_DISKS:
-      if disk.endswith('/'):
-        disk = disk[:-1]
+      if disk and not disk.endswith('/'):
+        disk+="/" 
 
       if logGroupCreated == False:
         printStage("Creating Log Group")
         logGroupCreated = True
         subCommand = (
-          "CREATE LOGFILE GROUP lg_1 ADD UNDOFILE '%s/undo_log_%d.log' INITIAL_SIZE = %s ENGINE ndbcluster" % (
+          "CREATE LOGFILE GROUP lg_1 ADD UNDOFILE '%s undo_log_%d.log' INITIAL_SIZE = %s ENGINE ndbcluster" % (
             disk, fileIndex, LOGFILE_SIZE))
       else:
         subCommand = (
-          "ALTER LOGFILE GROUP lg_1 ADD UNDOFILE '%s/undo_log_%d.log' INITIAL_SIZE = %s ENGINE ndbcluster" % (
+          "ALTER LOGFILE GROUP lg_1 ADD UNDOFILE '%s undo_log_%d.log' INITIAL_SIZE = %s ENGINE ndbcluster" % (
             disk, fileIndex, LOGFILE_SIZE))
       executeSQLCommand(subCommand)
 
@@ -63,15 +63,15 @@ def create():
   tableSpaceCreated = False
   for fileIndex in range(0, DATAFILES_PER_DISK):
     for disk in DATA_DISKS:
-      if disk.endswith('/'):
-        disk = disk[:-1]
+      if disk and not disk.endswith('/'):
+        disk+="/" 
 
       if tableSpaceCreated == False:
         printStage("Creating Table Space")
         tableSpaceCreated = True
-        subCommand = ("CREATE TABLESPACE ts_1 ADD datafile '%s/data_file_%d.dat' use LOGFILE GROUP lg_1 INITIAL_SIZE = %s  ENGINE ndbcluster" % (disk, fileIndex, DATAFILE_SIZE))
+        subCommand = ("CREATE TABLESPACE ts_1 ADD datafile '%s data_file_%d.dat' use LOGFILE GROUP lg_1 INITIAL_SIZE = %s  ENGINE ndbcluster" % (disk, fileIndex, DATAFILE_SIZE))
       else:
-        subCommand = ("ALTER TABLESPACE ts_1 ADD datafile '%s/data_file_%d.dat' INITIAL_SIZE = %s  ENGINE ndbcluster" % (disk, fileIndex, DATAFILE_SIZE))
+        subCommand = ("ALTER TABLESPACE ts_1 ADD datafile '%s data_file_%d.dat' INITIAL_SIZE = %s  ENGINE ndbcluster" % (disk, fileIndex, DATAFILE_SIZE))
       executeSQLCommand(subCommand)
 
   #Create Table
@@ -90,10 +90,10 @@ def drop():
   printStage("Dropping Table Space")
   for fileIndex in range(0, DATAFILES_PER_DISK):
     for disk in DATA_DISKS:
-      if disk.endswith('/'):
-        disk = disk[:-1]
+      if disk and not disk.endswith('/'):
+        disk+="/"
 
-      subCommand = ("ALTER TABLESPACE ts_1 drop datafile '%s/data_file_%d.dat' ENGINE ndbcluster" % (disk, fileIndex))
+      subCommand = ("ALTER TABLESPACE ts_1 drop datafile '%s data_file_%d.dat' ENGINE ndbcluster" % (disk, fileIndex))
       executeSQLCommand(subCommand)
 
   subCommand = "DROP TABLESPACE ts_1 ENGINE ndbcluster"
