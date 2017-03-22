@@ -76,7 +76,7 @@ def create():
 
   #Create Table
   printStage("Creating Tables")
-  subCommand = ("CREATE table hdfs_file_inode_data ( inode_id int(11) PRIMARY KEY, data varbinary(%d) not null ) TABLESPACE ts_1 STORAGE DISK ENGINE ndbcluster"% (HDFS_FILE_INODE_DATA_SIZE))
+  subCommand = ("CREATE table hdfs_file_inode_data ( inode_id int(11) PRIMARY KEY, data varbinary(%d) not null ) TABLESPACE ts_1 STORAGE DISK ENGINE ndbcluster partition by key (`inode_id`)"% (HDFS_FILE_INODE_DATA_SIZE))
   executeSQLCommand(subCommand)
 
 
