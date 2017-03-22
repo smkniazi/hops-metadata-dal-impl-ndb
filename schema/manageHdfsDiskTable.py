@@ -7,15 +7,15 @@ import sys
 #DATA_DISKS = ["/var/lib/mysql-cluster/ndb/ndb_data/disk_data/"]
 DATA_DISKS = [""]
 DATAFILE_SIZE = "1024M"
-DATAFILES_PER_DISK = 2
+DATAFILES_PER_DISK = 1
 
 #LOG_DISKS = ["/media/tmpfs"]
 #LOG_DISKS = ["/var/lib/mysql-cluster/ndb/ndb_data/disk_data/"]
 LOG_DISKS = [""]
 LOGFILE_SIZE = "1024M"
-LOGFILES_PER_DISK = 2
+LOGFILES_PER_DISK = 1
 
-CONNECT_STRING = "mysql -uhop -phop -P3306 -h bbc2 hop_salman_sf -e "
+CONNECT_STRING = "mysql -uhop -phop -P3306 -h hadoop36 hop_salman -e "
 
 HDFS_FILE_INODE_DATA_SIZE=4096
 
@@ -76,7 +76,7 @@ def create():
 
   #Create Table
   printStage("Creating Tables")
-  subCommand = ("CREATE table hdfs_file_inode_data ( inode_id int(11) PRIMARY KEY, data varbinary(%d) not null ) TABLESPACE ts_1 STORAGE DISK ENGINE ndbcluster partition by key (`inode_id`)"% (HDFS_FILE_INODE_DATA_SIZE))
+  subCommand = ("CREATE table hdfs_file_inode_data ( inode_id int(11) PRIMARY KEY, data varbinary(%d) not null ) TABLESPACE ts_1 STORAGE DISK ENGINE ndbcluster COMMENT='NDB_TABLE=READ_BACKUP=1' partition by key (\`inode_id\`)"% (HDFS_FILE_INODE_DATA_SIZE))
   executeSQLCommand(subCommand)
 
 
