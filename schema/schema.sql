@@ -97,6 +97,15 @@ CREATE TABLE `hdfs_inodes` (
 
 delimiter $$
 
+CREATE TABLE `hdfs_inmemory_file_inode_data` (
+  `inode_id` int(11) NOT NULL,
+  `data` varbinary(1024) NOT NULL,
+  PRIMARY KEY (`inode_id`)
+) ENGINE=ndbcluster DEFAULT CHARSET=latin1 COMMENT='NDB_TABLE=READ_BACKUP=1'
+/*!50100 PARTITION BY KEY (inode_id) */  $$
+
+delimiter $$
+
 CREATE TABLE `hdfs_users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL DEFAULT '',

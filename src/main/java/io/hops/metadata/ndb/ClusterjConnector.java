@@ -35,7 +35,7 @@ import io.hops.metadata.hdfs.dal.CorruptReplicaDataAccess;
 import io.hops.metadata.hdfs.dal.EncodingJobsDataAccess;
 import io.hops.metadata.hdfs.dal.EncodingStatusDataAccess;
 import io.hops.metadata.hdfs.dal.ExcessReplicaDataAccess;
-import io.hops.metadata.hdfs.dal.FileInodeDataDataAccess;
+import io.hops.metadata.hdfs.dal.InMemoryInodeDataAccess;
 import io.hops.metadata.hdfs.dal.GroupDataAccess;
 import io.hops.metadata.hdfs.dal.INodeAttributesDataAccess;
 import io.hops.metadata.hdfs.dal.INodeDataAccess;
@@ -306,8 +306,8 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
       cls = BlockChecksumClusterj.BlockChecksumDto.class;
     } else if (className == OngoingSubTreeOpsDataAccess.class) {
       cls = OnGoingSubTreeOpsClusterj.OnGoingSubTreeOpsDTO.class;
-    } else if (className == FileInodeDataDataAccess.class) {
-      cls = FileInodeDataClusterj.FileInodeDataDTO.class;
+    } else if (className == InMemoryInodeDataAccess.class) {
+      cls = OnDiskFileInodeClusterj.FileInodeDataDTO.class;
     }
 
     HopsSession session = obtainSession();
@@ -345,7 +345,7 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
   
   private boolean formatHDFS(boolean transactional) throws StorageException{
     return format(transactional,
-        INodeDataAccess.class, FileInodeDataDataAccess.class,
+        INodeDataAccess.class, InMemoryInodeDataAccess.class,
         BlockInfoDataAccess.class, LeaseDataAccess.class,
         LeasePathDataAccess.class, ReplicaDataAccess.class,
         ReplicaUnderConstructionDataAccess.class,
@@ -389,8 +389,10 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
           if (e == INodeDataAccess.class) {
             MysqlServerConnector
                 .truncateTable(transactional, io.hops.metadata.hdfs.TablesDef.INodeTableDef.TABLE_NAME);
-          } else if(e == FileInodeDataDataAccess.class){
-            MysqlServerConnector.truncateTable(transactional, io.hops.metadata.hdfs.TablesDef.FileInodeData.TABLE_NAME);
+          } else if(e == InMemoryInodeDataAccess.class){
+            MysqlServerConnector.truncateTable(transactional, io.hops.metadata.hdfs.TablesDef.FileInodeInMemoryData.TABLE_NAME);
+          } else if(e == InMemoryInodeDataAccess.class){
+            MysqlServerConnector.truncateTable(transactional, io.hops.metadata.hdfs.TablesDef.FileInodeDiskData.TABLE_NAME);
           } else if (e == BlockInfoDataAccess.class) {
             MysqlServerConnector
                 .truncateTable(transactional, io.hops.metadata.hdfs.TablesDef.BlockInfoTableDef.TABLE_NAME);

@@ -1,25 +1,23 @@
 package io.hops.metadata.ndb.dalimpl.hdfs;
 
-import com.mysql.clusterj.annotation.*;
+import com.mysql.clusterj.annotation.Column;
+import com.mysql.clusterj.annotation.PersistenceCapable;
+import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
 import io.hops.metadata.hdfs.TablesDef;
-import io.hops.metadata.hdfs.dal.FileInodeDataDataAccess;
+import io.hops.metadata.hdfs.dal.InMemoryInodeDataAccess;
 import io.hops.metadata.hdfs.entity.FileInodeData;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
-import io.hops.metadata.ndb.wrapper.HopsQuery;
-import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import org.apache.log4j.Logger;
-
-import java.util.List;
 
 /**
  * Created by salman on 3/10/16.
  */
-public class FileInodeDataClusterj
-        implements TablesDef.FileInodeData, FileInodeDataDataAccess<FileInodeData> {
-  static final Logger LOG = Logger.getLogger(FileInodeDataClusterj.class);
+public class InMemoryFileInodeClusterj
+        implements TablesDef.FileInodeInMemoryData, InMemoryInodeDataAccess<FileInodeData> {
+  static final Logger LOG = Logger.getLogger(InMemoryFileInodeClusterj.class);
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
 
@@ -41,9 +39,12 @@ public class FileInodeDataClusterj
 
   @Override
   public void add(FileInodeData fileInodeData) throws StorageException {
-    final HopsSession session = connector.obtainSession();
+    if(fileInodeData.getDBFileStorageType() != FileInodeData.Type.InmemoryFile){
+      throw new IllegalArgumentException("Expecting inmemory file object. Got: "+fileInodeData.getDBFileStorageType());
+    }
 
-    FileInodeDataDTO dto = session.newInstance(FileInodeDataClusterj.FileInodeDataDTO.class);
+    final HopsSession session = connector.obtainSession();
+    FileInodeDataDTO dto = session.newInstance(InMemoryFileInodeClusterj.FileInodeDataDTO.class);
     dto.setInodeId(fileInodeData.getInodeId());
     dto.setData(fileInodeData.getInodeData());
     session.savePersistent(dto);
@@ -52,8 +53,12 @@ public class FileInodeDataClusterj
 
   @Override
   public void delete(FileInodeData fileInodeData) throws StorageException {
+    if(fileInodeData.getDBFileStorageType() != FileInodeData.Type.InmemoryFile){
+      throw new IllegalArgumentException("Expecting inmemory file object. Got: "+fileInodeData.getDBFileStorageType());
+    }
+
     final HopsSession session = connector.obtainSession();
-    session.deletePersistent(FileInodeDataClusterj.FileInodeDataDTO.class, fileInodeData.getInodeId());
+    session.deletePersistent(InMemoryFileInodeClusterj.FileInodeDataDTO.class, fileInodeData.getInodeId());
   }
 
   @Override
@@ -63,7 +68,7 @@ public class FileInodeDataClusterj
     if (dataDto != null) {
       byte[] data = new byte[dataDto.getData().length];
       System.arraycopy(dataDto.getData(),0,data,0,data.length);
-      FileInodeData fileData = new FileInodeData(inodeId, data);
+      FileInodeData fileData = new FileInodeData(inodeId, data, FileInodeData.Type.InmemoryFile );
       session.release(dataDto);
       return fileData;
     }
