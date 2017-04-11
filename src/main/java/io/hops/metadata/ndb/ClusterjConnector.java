@@ -27,36 +27,7 @@ import io.hops.metadata.common.entity.Variable;
 import io.hops.metadata.election.TablesDef;
 import io.hops.metadata.election.dal.HdfsLeDescriptorDataAccess;
 import io.hops.metadata.election.dal.YarnLeDescriptorDataAccess;
-import io.hops.metadata.hdfs.dal.AccessTimeLogDataAccess;
-import io.hops.metadata.hdfs.dal.BlockChecksumDataAccess;
-import io.hops.metadata.hdfs.dal.BlockInfoDataAccess;
-import io.hops.metadata.hdfs.dal.BlockLookUpDataAccess;
-import io.hops.metadata.hdfs.dal.CorruptReplicaDataAccess;
-import io.hops.metadata.hdfs.dal.EncodingJobsDataAccess;
-import io.hops.metadata.hdfs.dal.EncodingStatusDataAccess;
-import io.hops.metadata.hdfs.dal.ExcessReplicaDataAccess;
-import io.hops.metadata.hdfs.dal.InMemoryInodeDataAccess;
-import io.hops.metadata.hdfs.dal.GroupDataAccess;
-import io.hops.metadata.hdfs.dal.INodeAttributesDataAccess;
-import io.hops.metadata.hdfs.dal.INodeDataAccess;
-import io.hops.metadata.hdfs.dal.InvalidateBlockDataAccess;
-import io.hops.metadata.hdfs.dal.LeaseDataAccess;
-import io.hops.metadata.hdfs.dal.LeasePathDataAccess;
-import io.hops.metadata.hdfs.dal.MetadataLogDataAccess;
-import io.hops.metadata.hdfs.dal.MisReplicatedRangeQueueDataAccess;
-import io.hops.metadata.hdfs.dal.OngoingSubTreeOpsDataAccess;
-import io.hops.metadata.hdfs.dal.PendingBlockDataAccess;
-import io.hops.metadata.hdfs.dal.QuotaUpdateDataAccess;
-import io.hops.metadata.hdfs.dal.RepairJobsDataAccess;
-import io.hops.metadata.hdfs.dal.ReplicaDataAccess;
-import io.hops.metadata.hdfs.dal.ReplicaUnderConstructionDataAccess;
-import io.hops.metadata.hdfs.dal.SafeBlocksDataAccess;
-import io.hops.metadata.hdfs.dal.SizeLogDataAccess;
-import io.hops.metadata.hdfs.dal.StorageIdMapDataAccess;
-import io.hops.metadata.hdfs.dal.UnderReplicatedBlockDataAccess;
-import io.hops.metadata.hdfs.dal.UserDataAccess;
-import io.hops.metadata.hdfs.dal.UserGroupDataAccess;
-import io.hops.metadata.hdfs.dal.VariableDataAccess;
+import io.hops.metadata.hdfs.dal.*;
 import io.hops.metadata.ndb.dalimpl.election.HdfsLeaderClusterj;
 import io.hops.metadata.ndb.dalimpl.election.YarnLeaderClusterj;
 import io.hops.metadata.ndb.dalimpl.hdfs.*;
@@ -307,6 +278,8 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
     } else if (className == OngoingSubTreeOpsDataAccess.class) {
       cls = OnGoingSubTreeOpsClusterj.OnGoingSubTreeOpsDTO.class;
     } else if (className == InMemoryInodeDataAccess.class) {
+      cls = InMemoryFileInodeClusterj.FileInodeDataDTO.class;
+    } else if (className == OnDiskInodeDataAccess.class) {
       cls = OnDiskFileInodeClusterj.FileInodeDataDTO.class;
     }
 
@@ -345,7 +318,7 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
   
   private boolean formatHDFS(boolean transactional) throws StorageException{
     return format(transactional,
-        INodeDataAccess.class, InMemoryInodeDataAccess.class,
+        INodeDataAccess.class, InMemoryInodeDataAccess.class, OnDiskInodeDataAccess.class,
         BlockInfoDataAccess.class, LeaseDataAccess.class,
         LeasePathDataAccess.class, ReplicaDataAccess.class,
         ReplicaUnderConstructionDataAccess.class,
@@ -391,7 +364,7 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
                 .truncateTable(transactional, io.hops.metadata.hdfs.TablesDef.INodeTableDef.TABLE_NAME);
           } else if(e == InMemoryInodeDataAccess.class){
             MysqlServerConnector.truncateTable(transactional, io.hops.metadata.hdfs.TablesDef.FileInodeInMemoryData.TABLE_NAME);
-          } else if(e == InMemoryInodeDataAccess.class){
+          } else if(e == OnDiskInodeDataAccess.class){
             MysqlServerConnector.truncateTable(transactional, io.hops.metadata.hdfs.TablesDef.FileInodeDiskData.TABLE_NAME);
           } else if (e == BlockInfoDataAccess.class) {
             MysqlServerConnector

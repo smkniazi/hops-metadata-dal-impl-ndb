@@ -3,7 +3,7 @@ package io.hops.metadata.ndb.dalimpl.hdfs;
 import com.mysql.clusterj.annotation.*;
 import io.hops.exception.StorageException;
 import io.hops.metadata.hdfs.TablesDef;
-import io.hops.metadata.hdfs.dal.InMemoryInodeDataAccess;
+import io.hops.metadata.hdfs.dal.OnDiskInodeDataAccess;
 import io.hops.metadata.hdfs.entity.FileInodeData;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
  * Created by salman on 3/10/16.
  */
 public class OnDiskFileInodeClusterj
-        implements TablesDef.FileInodeDiskData, InMemoryInodeDataAccess<FileInodeData> {
+        implements TablesDef.FileInodeDiskData, OnDiskInodeDataAccess<FileInodeData> {
   static final Logger LOG = Logger.getLogger(OnDiskFileInodeClusterj.class);
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
