@@ -113,7 +113,9 @@ public class NdbStorageFactory implements DalStorageFactory {
     dataAccessMap.put(LeasePathDataAccess.class, new LeasePathClusterj());
     dataAccessMap.put(OngoingSubTreeOpsDataAccess.class, new OnGoingSubTreeOpsClusterj());
     dataAccessMap.put(InMemoryInodeDataAccess.class, new InMemoryFileInodeClusterj());
-    dataAccessMap.put(OnDiskInodeDataAccess.class, new OnDiskFileInodeClusterj());
+    dataAccessMap.put(SmallOnDiskInodeDataAccess.class, new SmallOnDiskFileInodeClusterj());
+    dataAccessMap.put(MediumOnDiskInodeDataAccess.class, new MediumOnDiskFileInodeClusterj());
+    dataAccessMap.put(LargeOnDiskInodeDataAccess.class, new LargeOnDiskFileInodeClusterj());
     dataAccessMap
             .put(HdfsLeDescriptorDataAccess.class, new HdfsLeaderClusterj());
     dataAccessMap

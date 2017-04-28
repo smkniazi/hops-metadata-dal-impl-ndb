@@ -1,9 +1,11 @@
 package io.hops.metadata.ndb.dalimpl.hdfs;
 
-import com.mysql.clusterj.annotation.*;
+import com.mysql.clusterj.annotation.Column;
+import com.mysql.clusterj.annotation.PersistenceCapable;
+import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
 import io.hops.metadata.hdfs.TablesDef;
-import io.hops.metadata.hdfs.dal.OnDiskInodeDataAccess;
+import io.hops.metadata.hdfs.dal.SmallOnDiskInodeDataAccess;
 import io.hops.metadata.hdfs.entity.FileInodeData;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
@@ -13,9 +15,9 @@ import org.apache.log4j.Logger;
 /**
  * Created by salman on 3/10/16.
  */
-public class OnDiskFileInodeClusterj
-        implements TablesDef.FileInodeDiskData, OnDiskInodeDataAccess<FileInodeData> {
-  static final Logger LOG = Logger.getLogger(OnDiskFileInodeClusterj.class);
+public class SmallOnDiskFileInodeClusterj
+        implements TablesDef.FileInodeSmallDiskData, SmallOnDiskInodeDataAccess<FileInodeData> {
+  static final Logger LOG = Logger.getLogger(SmallOnDiskFileInodeClusterj.class);
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
 
@@ -42,7 +44,7 @@ public class OnDiskFileInodeClusterj
     }
 
     final HopsSession session = connector.obtainSession();
-    FileInodeDataDTO dto = session.newInstance(OnDiskFileInodeClusterj.FileInodeDataDTO.class);
+    FileInodeDataDTO dto = session.newInstance(SmallOnDiskFileInodeClusterj.FileInodeDataDTO.class);
     dto.setInodeId(fileInodeData.getInodeId());
     dto.setData(fileInodeData.getInodeData());
     session.savePersistent(dto);
@@ -55,7 +57,7 @@ public class OnDiskFileInodeClusterj
       throw new IllegalArgumentException("Expecting on disk file object. Got: "+fileInodeData.getDBFileStorageType());
     }
     final HopsSession session = connector.obtainSession();
-    session.deletePersistent(OnDiskFileInodeClusterj.FileInodeDataDTO.class, fileInodeData.getInodeId());
+    session.deletePersistent(SmallOnDiskFileInodeClusterj.FileInodeDataDTO.class, fileInodeData.getInodeId());
   }
 
   @Override

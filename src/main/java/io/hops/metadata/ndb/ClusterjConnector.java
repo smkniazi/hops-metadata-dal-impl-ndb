@@ -279,8 +279,12 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
       cls = OnGoingSubTreeOpsClusterj.OnGoingSubTreeOpsDTO.class;
     } else if (className == InMemoryInodeDataAccess.class) {
       cls = InMemoryFileInodeClusterj.FileInodeDataDTO.class;
-    } else if (className == OnDiskInodeDataAccess.class) {
-      cls = OnDiskFileInodeClusterj.FileInodeDataDTO.class;
+    } else if (className == SmallOnDiskInodeDataAccess.class) {
+      cls = SmallOnDiskFileInodeClusterj.FileInodeDataDTO.class;
+    } else if (className == MediumOnDiskInodeDataAccess.class) {
+      cls = MediumOnDiskFileInodeClusterj.FileInodeDataDTO.class;
+    } else if (className == LargeOnDiskInodeDataAccess.class) {
+      cls = LargeOnDiskFileInodeClusterj.FileInodeDataDTO.class;
     }
 
     HopsSession session = obtainSession();
@@ -318,7 +322,9 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
   
   private boolean formatHDFS(boolean transactional) throws StorageException{
     return format(transactional,
-        INodeDataAccess.class, InMemoryInodeDataAccess.class, OnDiskInodeDataAccess.class,
+        INodeDataAccess.class, InMemoryInodeDataAccess.class,
+        SmallOnDiskInodeDataAccess.class, MediumOnDiskFileInodeClusterj.class,
+        LargeOnDiskFileInodeClusterj.class,
         BlockInfoDataAccess.class, LeaseDataAccess.class,
         LeasePathDataAccess.class, ReplicaDataAccess.class,
         ReplicaUnderConstructionDataAccess.class,
@@ -364,8 +370,12 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
                 .truncateTable(transactional, io.hops.metadata.hdfs.TablesDef.INodeTableDef.TABLE_NAME);
           } else if(e == InMemoryInodeDataAccess.class){
             MysqlServerConnector.truncateTable(transactional, io.hops.metadata.hdfs.TablesDef.FileInodeInMemoryData.TABLE_NAME);
-          } else if(e == OnDiskInodeDataAccess.class){
-            MysqlServerConnector.truncateTable(transactional, io.hops.metadata.hdfs.TablesDef.FileInodeDiskData.TABLE_NAME);
+          } else if(e == SmallOnDiskInodeDataAccess.class){
+            MysqlServerConnector.truncateTable(transactional, io.hops.metadata.hdfs.TablesDef.FileInodeSmallDiskData.TABLE_NAME);
+          } else if(e == MediumOnDiskInodeDataAccess.class){
+            MysqlServerConnector.truncateTable(transactional, io.hops.metadata.hdfs.TablesDef.FileInodeMediumlDiskData.TABLE_NAME);
+          } else if(e == LargeOnDiskInodeDataAccess.class){
+            MysqlServerConnector.truncateTable(transactional, io.hops.metadata.hdfs.TablesDef.FileInodeLargeDiskData.TABLE_NAME);
           } else if (e == BlockInfoDataAccess.class) {
             MysqlServerConnector
                 .truncateTable(transactional, io.hops.metadata.hdfs.TablesDef.BlockInfoTableDef.TABLE_NAME);
