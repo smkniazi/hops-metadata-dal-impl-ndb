@@ -6,7 +6,6 @@ import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
 import io.hops.metadata.hdfs.TablesDef;
 import io.hops.metadata.hdfs.dal.LargeOnDiskInodeDataAccess;
-import io.hops.metadata.hdfs.dal.OnDiskInodeDataAccess;
 import io.hops.metadata.hdfs.entity.FileInodeData;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;

@@ -17,7 +17,9 @@ LOGFILES_PER_DISK = 1
 
 CONNECT_STRING = "mysql -uhop -phop -P3306 -h bbc2.sics.se hop_salman_sf -e "
 
-HDFS_FILE_INODE_DATA_SIZE=32768
+ONDISK_SMALL_FILE_INODE_SIZE=4096
+ONDISK_MEDIUM_FILE_INODE_SIZE=8192
+ONDISK_LARGE_FILE_INODE_SIZE=32768
 
 class bcolors:
     HEADER = '\033[95m'
@@ -76,7 +78,11 @@ def create():
 
   #Create Table
   printStage("Creating Tables")
-  subCommand = ("CREATE table hdfs_ondisk_file_inode_data ( inode_id int(11) PRIMARY KEY, data blob(%d) not null ) TABLESPACE ts_1 STORAGE DISK ENGINE ndbcluster COMMENT='NDB_TABLE=READ_BACKUP=1' partition by key (\`inode_id\`)"% (HDFS_FILE_INODE_DATA_SIZE))
+  subCommand = ("CREATE table hdfs_ondisk_small_file_inode_data ( inode_id int(11) PRIMARY KEY, data blob(%d) not null ) TABLESPACE ts_1 STORAGE DISK ENGINE ndbcluster COMMENT='NDB_TABLE=READ_BACKUP=1' partition by key (\`inode_id\`)"% (ONDISK_SMALL_FILE_INODE_SIZE))
+  executeSQLCommand(subCommand)
+  subCommand = ("CREATE table hdfs_ondisk_medium_file_inode_data ( inode_id int(11) PRIMARY KEY, data blob(%d) not null ) TABLESPACE ts_1 STORAGE DISK ENGINE ndbcluster COMMENT='NDB_TABLE=READ_BACKUP=1' partition by key (\`inode_id\`)"% (ONDISK_MEDIUM_FILE_INODE_SIZE))
+  executeSQLCommand(subCommand)
+  subCommand = ("CREATE table hdfs_ondisk_large_file_inode_data ( inode_id int(11) PRIMARY KEY, data blob(%d) not null ) TABLESPACE ts_1 STORAGE DISK ENGINE ndbcluster COMMENT='NDB_TABLE=READ_BACKUP=1' partition by key (\`inode_id\`)"% (ONDISK_LARGE_FILE_INODE_SIZE))
   executeSQLCommand(subCommand)
 
 
@@ -84,7 +90,9 @@ def create():
 def drop():
   #Drop table 
   printStage("Dropping Tables")
-  executeSQLCommand("DROP TABLE hdfs_ondisk_file_inode_data")
+  executeSQLCommand("DROP TABLE hdfs_ondisk_small_file_inode_data")
+  executeSQLCommand("DROP TABLE hdfs_ondisk_medium_file_inode_data")
+  executeSQLCommand("DROP TABLE hdfs_ondisk_large_file_inode_data")
 
   # Drop Table Space
   printStage("Dropping Table Space")

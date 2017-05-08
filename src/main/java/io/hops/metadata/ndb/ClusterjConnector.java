@@ -323,8 +323,8 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
   private boolean formatHDFS(boolean transactional) throws StorageException{
     return format(transactional,
         INodeDataAccess.class, InMemoryInodeDataAccess.class,
-        SmallOnDiskInodeDataAccess.class, MediumOnDiskFileInodeClusterj.class,
-        LargeOnDiskFileInodeClusterj.class,
+        SmallOnDiskInodeDataAccess.class, MediumOnDiskInodeDataAccess.class,
+        LargeOnDiskInodeDataAccess.class,
         BlockInfoDataAccess.class, LeaseDataAccess.class,
         LeasePathDataAccess.class, ReplicaDataAccess.class,
         ReplicaUnderConstructionDataAccess.class,
