@@ -335,10 +335,9 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
         BlockLookUpDataAccess.class, SafeBlocksDataAccess.class,
         MisReplicatedRangeQueueDataAccess.class, QuotaUpdateDataAccess.class,
         EncodingStatusDataAccess.class, BlockChecksumDataAccess.class,
-        OngoingSubTreeOpsDataAccess.class,
-        MetadataLogDataAccess.class, AccessTimeLogDataAccess.class,
-        SizeLogDataAccess.class, EncodingJobsDataAccess.class,
-        RepairJobsDataAccess.class, UserDataAccess.class, GroupDataAccess.class,
+        OngoingSubTreeOpsDataAccess.class, MetadataLogDataAccess.class,
+        EncodingJobsDataAccess.class,RepairJobsDataAccess.class,
+        UserDataAccess.class, GroupDataAccess.class,
         UserGroupDataAccess.class,VariableDataAccess.class);
   }
   
@@ -453,12 +452,6 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
                 io.hops.metadata.hdfs.TablesDef.MetadataLogTableDef.TABLE_NAME);
             MysqlServerConnector.truncateTable(transactional,
                 io.hops.metadata.hdfs.TablesDef.MetadataLogTableDef.LOOKUP_TABLE_NAME);
-          } else if (e == AccessTimeLogDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional,
-                io.hops.metadata.hdfs.TablesDef.AccessTimeLogTableDef.TABLE_NAME);
-          } else if (e == SizeLogDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional,
-                io.hops.metadata.hdfs.TablesDef.SizeLogTableDef.TABLE_NAME);
           } else if (e == EncodingJobsDataAccess.class) {
             MysqlServerConnector
                 .truncateTable(transactional, io.hops.metadata.hdfs.TablesDef.EncodingJobsTableDef.TABLE_NAME);
