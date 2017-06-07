@@ -416,6 +416,7 @@ CREATE TABLE `yarn_resource` (
   `id` VARCHAR(255) NOT NULL,
   `memory` INT NULL,
   `virtualcores` INT NULL,
+  `gpus` INT NULL,
   `pendingeventid` INT,
   PRIMARY KEY (`id`),
   INDEX `id` (`id` ASC)
@@ -552,6 +553,7 @@ CREATE TABLE `yarn_containers_logs` (
   `exit_status` INT DEFAULT NULL,
   `price` FLOAT  DEFAULT NULL,
   `vcores` INT DEFAULT NULL,
+  `gpus` INT DEFAULT NULL,
   `mb` INT DEFAULT NULL,
   PRIMARY KEY (`container_id`))
 ENGINE = ndbcluster $$

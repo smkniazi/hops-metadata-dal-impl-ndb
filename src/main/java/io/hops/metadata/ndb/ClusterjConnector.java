@@ -317,7 +317,8 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
         ApplicationAttemptStateDataAccess.class, DelegationKeyDataAccess.class,
         DelegationTokenDataAccess.class, ProjectQuotaDataAccess.class,
         ContainersLogsDataAccess.class, ContainersCheckPointsDataAccess.class,
-        ProjectsDailyCostDataAccess.class, PriceMultiplicatorDataAccess.class);
+        ProjectsDailyCostDataAccess.class, PriceMultiplicatorDataAccess.class,
+        ResourceDataAccess.class);
   }
   
   private boolean formatHDFS(boolean transactional) throws StorageException{
