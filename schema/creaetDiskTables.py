@@ -15,7 +15,7 @@ LOG_DISKS = [""]
 LOGFILE_SIZE = "1024M"
 LOGFILES_PER_DISK = 1
 
-CONNECT_STRING = "mysql -uhop -phop -P3306 -h bbc2.sics.se hop_salman_sf -e "
+CONNECT_STRING = "mysql -uhop -phop -P3306 -h salman3 hop_salman_sf -e "
 
 ONDISK_SMALL_FILE_INODE_SIZE=4096
 ONDISK_MEDIUM_FILE_INODE_SIZE=8192

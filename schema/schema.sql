@@ -86,7 +86,7 @@ CREATE TABLE `hdfs_inodes` (
   `is_dir` tinyint NOT NULL,
   `under_construction` tinyint NOT NULL,
   `subtree_locked` tinyint DEFAULT NULL,
-  `file_stored_in_db` bit(8) NOT NULL,
+  `file_stored_in_db` tinyint(4) NOT NULL,
   PRIMARY KEY (`partition_id`,`parent_id`,`name`),
   KEY `pidex` (`parent_id`),
   KEY `inode_idx` (`id`),
