@@ -132,7 +132,6 @@ def drop():
 
 
 if __name__ == "__main__":
-    print "x"
     if ((args.create == False and args.drop == False) or args.host == '' or args.database == '' or args.passwd == '' or args.userName == '' or args.host == '' ) :
         parser.print_help()
         exit()
