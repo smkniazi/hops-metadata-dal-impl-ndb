@@ -21,8 +21,8 @@ CREATE TABLE `hdfs_block_lookup_table` (
   `block_id` bigint(20) NOT NULL,
   `inode_id` int(11) NOT NULL,
   PRIMARY KEY (`block_id`)
-) ENGINE=ndbcluster DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs COMMENT='NDB_TABLE=READ_BACKUP=1'$$
-
+) ENGINE=ndbcluster DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs COMMENT='NDB_TABLE=READ_BACKUP=1'
+/*!50100 PARTITION BY KEY (block_id) */$$
 
 delimiter $$
 
@@ -58,7 +58,8 @@ CREATE TABLE `hdfs_inode_attributes` (
   `nscount` bigint(20) DEFAULT NULL,
   `diskspace` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`inodeId`)
-) ENGINE=ndbcluster DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs COMMENT='NDB_TABLE=READ_BACKUP=1'$$
+) ENGINE=ndbcluster DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs COMMENT='NDB_TABLE=READ_BACKUP=1'
+/*!50100 PARTITION BY KEY (inodeId) */$$
 
 
 delimiter $$
@@ -169,7 +170,8 @@ CREATE TABLE `hdfs_users` (
   `name` varchar(100) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE KEY (`name`)
-) ENGINE=ndbcluster DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs$$
+) ENGINE=ndbcluster DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs
+/*!50100 PARTITION BY KEY (id) */  $$
 
 delimiter $$
 
@@ -178,7 +180,8 @@ CREATE TABLE `hdfs_groups` (
   `name` varchar(100) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE KEY (`name`)
-) ENGINE=ndbcluster DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs$$
+) ENGINE=ndbcluster DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs
+/*!50100 PARTITION BY KEY (id) */  $$
 
 delimiter $$
 
@@ -196,7 +199,8 @@ CREATE TABLE `hdfs_users_groups` (
     REFERENCES `hdfs_groups` (`id`)
     ON DELETE CASCADE
     ON UPDATE NO ACTION
-) ENGINE=ndbcluster DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs$$
+) ENGINE=ndbcluster DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs
+/*!50100 PARTITION BY KEY (user_id) */  $$
 
 delimiter $$
 
