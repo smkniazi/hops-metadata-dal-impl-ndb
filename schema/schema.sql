@@ -117,7 +117,7 @@ BEGIN
 	
 	SELECT count(TABLESPACE_NAME) INTO tc FROM INFORMATION_SCHEMA.FILES where TABLESPACE_NAME="ts_1";
 	IF (tc = 0) THEN
-		CREATE TABLESPACE ts_1 ADD datafile 'data_file_0.dat' use LOGFILE GROUP lg_1 INITIAL_SIZE = 2048M  ENGINE ndbcluster;
+		CREATE TABLESPACE ts_1 ADD datafile 'ts_1_data_file_0.dat' use LOGFILE GROUP lg_1 INITIAL_SIZE = 2048M  ENGINE ndbcluster;
 	ELSE
 		select "The DataFile  data_file_0.dat has already been created" as "";
 	END IF;
@@ -129,7 +129,7 @@ CALL simpleproc$$
 
 delimiter $$
 
-CREATE TABLE `hdfs_ondisk_small_file_inode_data` (
+CREATE TABLE IF NOT EXISTS `hdfs_ondisk_small_file_inode_data` (
 	  `inode_id` int(11) NOT NULL,
 	  `data` blob NOT NULL,
 	  PRIMARY KEY (`inode_id`)
@@ -138,7 +138,7 @@ CREATE TABLE `hdfs_ondisk_small_file_inode_data` (
 
 delimiter $$
 
-CREATE TABLE `hdfs_ondisk_medium_file_inode_data` (
+CREATE TABLE IF NOT EXISTS `hdfs_ondisk_medium_file_inode_data` (
   `inode_id` int(11) NOT NULL,
   `data` blob NOT NULL,
   PRIMARY KEY (`inode_id`)
@@ -147,7 +147,7 @@ CREATE TABLE `hdfs_ondisk_medium_file_inode_data` (
 
 delimiter $$
 
- CREATE TABLE `hdfs_ondisk_large_file_inode_data` (
+ CREATE TABLE IF NOT EXISTS `hdfs_ondisk_large_file_inode_data` (
   `inode_id` int(11) NOT NULL,
   `data` blob NOT NULL,
   PRIMARY KEY (`inode_id`)
