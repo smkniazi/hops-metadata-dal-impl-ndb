@@ -111,7 +111,7 @@ BEGIN
 	IF (lc = 0) THEN
 	    CREATE LOGFILE GROUP lg_1 ADD UNDOFILE 'undo_log_0.log' INITIAL_SIZE = 2048M ENGINE ndbcluster;
 	ELSE
-		select "The LogFile undo_log_0.log has already been created" as "";
+		select "The LogFile has already been created" as "";
 	END IF;
 
 	
@@ -119,7 +119,7 @@ BEGIN
 	IF (tc = 0) THEN
 		CREATE TABLESPACE ts_1 ADD datafile 'ts_1_data_file_0.dat' use LOGFILE GROUP lg_1 INITIAL_SIZE = 2048M  ENGINE ndbcluster;
 	ELSE
-		select "The DataFile  data_file_0.dat has already been created" as "";
+		select "The DataFile has already been created" as "";
 	END IF;
 END$$
 
@@ -221,8 +221,8 @@ delimiter $$
 CREATE TABLE `hdfs_le_descriptors` (
   `id` bigint(20) NOT NULL,
   `counter` bigint(20) NOT NULL,
-  `hostname` varchar(25) NOT NULL,
-  `httpAddress` varchar(100) DEFAULT NULL,
+  `rpc_addresses` varchar(128) NOT NULL,
+  `http_address` varchar(100) DEFAULT NULL,
   `partition_val` int(11) NOT NULL DEFAULT '0',
 PRIMARY KEY (`id`,`partition_val`),
 KEY `part` (`partition_val`)
@@ -234,8 +234,8 @@ delimiter $$
 CREATE TABLE `yarn_le_descriptors` (
   `id` bigint(20) NOT NULL,
   `counter` bigint(20) NOT NULL,
-  `hostname` varchar(25) NOT NULL,
-  `httpAddress` varchar(100) DEFAULT NULL,
+  `rpc_addresses` varchar(128) NOT NULL,
+  `http_address` varchar(100) DEFAULT NULL,
   `partition_val` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`,`partition_val`),
   KEY `part` (`partition_val`)
