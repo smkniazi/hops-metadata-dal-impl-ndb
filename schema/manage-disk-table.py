@@ -34,9 +34,9 @@ CONNECT_STRING = "MYSQL_PWD="+args.passwd+" mysql -u"+args.userName+" -P"+args.p
 print CONNECT_STRING
 
 
-ONDISK_SMALL_FILE_INODE_SIZE=4096
-ONDISK_MEDIUM_FILE_INODE_SIZE=8192
-ONDISK_LARGE_FILE_INODE_SIZE=65536
+ONDISK_SMALL_FILE_INODE_SIZE=2000
+ONDISK_MEDIUM_FILE_INODE_SIZE=4000
+ONDISK_LARGE_FILE_INODE_SIZE=8000
 TS_NAME="ts_1"
 
 class bcolors:
@@ -96,11 +96,11 @@ def create():
 
   #Create Table
   printStage("Creating Tables")
-  subCommand = ("CREATE TABLE IF NOT EXISTS hdfs_ondisk_small_file_inode_data ( inode_id int(11) PRIMARY KEY, data blob(%d) not null ) TABLESPACE %s STORAGE DISK ENGINE ndbcluster COMMENT='NDB_TABLE=READ_BACKUP=1' partition by key (\`inode_id\`)"% (ONDISK_SMALL_FILE_INODE_SIZE, TS_NAME))
+  subCommand = ("CREATE TABLE IF NOT EXISTS hdfs_ondisk_small_file_inode_data ( inode_id int(11) PRIMARY KEY, data varchar(%d) not null ) TABLESPACE %s STORAGE DISK ENGINE ndbcluster COMMENT='NDB_TABLE=READ_BACKUP=1' partition by key (\`inode_id\`)"% (ONDISK_SMALL_FILE_INODE_SIZE, TS_NAME))
   executeSQLCommand(subCommand)
-  subCommand = ("CREATE TABLE IF NOT EXISTS hdfs_ondisk_medium_file_inode_data ( inode_id int(11) PRIMARY KEY, data blob(%d) not null ) TABLESPACE %s STORAGE DISK ENGINE ndbcluster COMMENT='NDB_TABLE=READ_BACKUP=1' partition by key (\`inode_id\`)"% (ONDISK_MEDIUM_FILE_INODE_SIZE, TS_NAME))
+  subCommand = ("CREATE TABLE IF NOT EXISTS hdfs_ondisk_medium_file_inode_data ( inode_id int(11) PRIMARY KEY, data varchar(%d) not null ) TABLESPACE %s STORAGE DISK ENGINE ndbcluster COMMENT='NDB_TABLE=READ_BACKUP=1' partition by key (\`inode_id\`)"% (ONDISK_MEDIUM_FILE_INODE_SIZE, TS_NAME))
   executeSQLCommand(subCommand)
-  subCommand = ("CREATE TABLE IF NOT EXISTS hdfs_ondisk_large_file_inode_data ( inode_id int(11) PRIMARY KEY, data blob(%d) not null ) TABLESPACE %s STORAGE DISK ENGINE ndbcluster COMMENT='NDB_TABLE=READ_BACKUP=1' partition by key (\`inode_id\`)"% (ONDISK_LARGE_FILE_INODE_SIZE, TS_NAME))
+  subCommand = ("CREATE TABLE IF NOT EXISTS hdfs_ondisk_large_file_inode_data ( inode_id int(11), dindex int(11), data varchar(%d) not null  PRIMARY KEY(`indoe_id`, `dindex`) ) TABLESPACE %s STORAGE DISK ENGINE ndbcluster COMMENT='NDB_TABLE=READ_BACKUP=1' partition by key (\`inode_id\`)"% (ONDISK_LARGE_FILE_INODE_SIZE, TS_NAME))
   executeSQLCommand(subCommand)
 
 
