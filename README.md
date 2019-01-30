@@ -23,6 +23,27 @@ And reload bashrc with:
 source ~/.bashrc
 ```
 
+## Build on Mac
+
+1. [Download latest MySQL Cluster](https://dev.mysql.com/downloads/cluster/)
+
+2. Install Protocol Buffer 2.5 ```brew install protobuf@2.5```
+
+3. Update your ~/.bash_profile to include paths to MySQL Cluster and protobuf: 
+
+Example:
+```
+export PATH="/usr/local/opt/protobuf@2.5/bin:$PATH"
+export LDFLAGS="-L/usr/local/opt/protobuf@2.5/lib -L/usr/local/mysql-cluster-gpl-7.6.9-macos10.14-x86_64/lib"
+export CPPFLAGS="-I/usr/local/opt/protobuf@2.5/include"
+export PKG_CONFIG_PATH="/usr/local/opt/protobuf@2.5/lib/pkgconfig"
+```
+Then run 
+```
+mvn clean install -DskipTests
+```
+
+
 Development Notes
 ===
 Updates to the schema should be done in the schema/update-schema_XXX.sql corresponding to the version you are working on.
