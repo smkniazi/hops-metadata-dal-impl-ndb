@@ -334,29 +334,22 @@ public class BlockInfoClusterj
   }
 
   public boolean existsOnAnyStorage(long inodeId, long blockId, List<Integer> sids) throws
-      StorageException {
+          StorageException {
     HopsSession session = connector.obtainSession();
-    
-    List<ReplicaClusterj.ReplicaDTO> dtos = new ArrayList<>();
-    for(Integer sid: sids){
+    for (Integer sid : sids) {
       Object[] pk = new Object[]{inodeId, blockId, sid};
-      ReplicaClusterj.ReplicaDTO dto = session.newInstance(ReplicaClusterj.ReplicaDTO.class, pk);
-      dto.setHashBucket(NOT_FOUND_ROW);
-      dto = session.load(dto);
-      dtos.add(dto);
-      
-    }
-    session.flush();
-    boolean exist = false;
-    for(ReplicaClusterj.ReplicaDTO dto: dtos){
-      if(dto.getHashBucket()!=NOT_FOUND_ROW){
-        exist = true;
-        break;
+      ReplicaClusterj.ReplicaDTO dto = null;
+      try {
+        dto = session.find(ReplicaClusterj.ReplicaDTO.class, pk);
+        if (dto != null) {
+          return true;
+        }
+      } finally {
+        session.release(dto);
       }
     }
-    session.release(dtos);
 
-    return exist;
+    return false;
   }
 
   private List<BlockInfo> readBlockInfoBatch(final HopsSession session,

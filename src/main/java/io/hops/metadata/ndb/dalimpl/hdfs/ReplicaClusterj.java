@@ -58,25 +58,17 @@ public class ReplicaClusterj
     @PrimaryKey
     @Column(name = INODE_ID)
     long getINodeId();
-
     void setINodeId(long inodeID);
     
     @PrimaryKey
     @Column(name = BLOCK_ID)
     long getBlockId();
-
     void setBlockId(long bid);
 
     @PrimaryKey
     @Column(name = STORAGE_ID)
     int getStorageId();
-
     void setStorageId(int id);
-
-    @Column(name = HASH_BUCKET)
-    int getHashBucket();
-
-    void setHashBucket(int hashBucket);
   }
 
   private ClusterjConnector connector = ClusterjConnector.getInstance();
@@ -311,8 +303,7 @@ public class ReplicaClusterj
     List<Replica> replicas =
         new ArrayList<>(triplets.size());
     for (ReplicaDTO t : triplets) {
-        replicas.add(
-            new Replica(t.getStorageId(), t.getBlockId(), t.getINodeId(), t.getHashBucket()));
+        replicas.add(new Replica(t.getStorageId(), t.getBlockId(), t.getINodeId()));
       session.release(t);
     }
     return replicas;
@@ -323,6 +314,5 @@ public class ReplicaClusterj
     newInstance.setBlockId(replica.getBlockId());
     newInstance.setStorageId(replica.getStorageId());
     newInstance.setINodeId(replica.getInodeId());
-    newInstance.setHashBucket(replica.getBucketId());
   }
 }
