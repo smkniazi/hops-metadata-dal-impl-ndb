@@ -52,4 +52,4 @@ ALTER TABLE `hdfs_directory_with_quota_feature` CHANGE `dsquota` `ssquota` bigin
 
 ALTER TABLE `hdfs_directory_with_quota_feature` CHANGE `diskspace` `storage_space` bigint(20);
 
-ALTER TABLE hdfs_active_block_reports ADD (`nn_rpc_address` varchar(128) COLLATE latin1_general_cs NOT NULL);
+ALTER TABLE hdfs_active_block_reports ADD (`nn_address` varchar(128) COLLATE latin1_general_cs NOT NULL);
