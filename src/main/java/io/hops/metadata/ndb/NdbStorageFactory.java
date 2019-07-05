@@ -19,6 +19,7 @@
 package io.hops.metadata.ndb;
 
 import io.hops.exception.StorageException;
+import io.hops.metadata.hdfs.entity.ProvidedBlockReportTask;
 import io.hops.DalStorageFactory;
 import io.hops.StorageConnector;
 import io.hops.exception.StorageInitializtionException;
@@ -142,6 +143,10 @@ public class NdbStorageFactory implements DalStorageFactory {
     dataAccessMap.put(FileProvenanceDataAccess.class, new FileProvenanceClusterj());
     dataAccessMap.put(AppProvenanceDataAccess.class, new AppProvenanceClusterJ());
     dataAccessMap.put(FileProvXAttrBufferDataAccess.class, new FileProvXAttrBufferClusterj());
+    dataAccessMap.put(ProvidedBlockCacheLocDataAccess.class,
+            new ProvidedBlockCacheLocClusterj());
+    dataAccessMap.put(ProvidedBlockReportTasksDataAccess.class,
+            new ProvidedBlockReportTasksClusterj());
   }
 
   @Override

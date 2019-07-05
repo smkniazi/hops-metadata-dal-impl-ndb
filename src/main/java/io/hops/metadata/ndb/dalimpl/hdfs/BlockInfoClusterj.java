@@ -105,6 +105,12 @@ public class BlockInfoClusterj
     long getTruncateBlockGenerationBlock();
 
     void setTruncateBlockGenerationBlock(long generationStamp);
+
+    @Column(name = CLOUD_BUCKET_ID)
+    short getCloudBucketId();
+
+    void setCloudBucketId(short cloudBucketId);
+
   }
   private ClusterjConnector connector = ClusterjConnector.getInstance();
   private final static int NOT_FOUND_ROW = -1000;
@@ -187,6 +193,42 @@ public class BlockInfoClusterj
     }
   }
 
+  //only for testing
+  @Override
+  public void deleteBlocksForFile(long inodeID) throws StorageException {
+    HopsSession session = connector.obtainSession();
+
+    HopsQueryBuilder qb = session.getQueryBuilder();
+    HopsQueryDomainType<BlockInfoDTO> dobj = qb.createQueryDefinition(BlockInfoDTO.class);
+    HopsPredicate pred1 = dobj.get("iNodeId").equal(dobj.param("inodeIdParam"));
+    dobj.where(pred1);
+
+    HopsQuery<BlockInfoDTO> query = session.createQuery(dobj);
+    query.setParameter("inodeIdParam", inodeID);
+    List<BlockInfoDTO> dtos = query.getResultList();
+
+    session.deletePersistentAll(dtos);
+    session.release(dtos);
+
+    deleteBlockLoopupForFile(inodeID);
+  }
+
+  private void deleteBlockLoopupForFile(long inodeID) throws StorageException {
+    HopsSession session = connector.obtainSession();
+
+    HopsQueryBuilder qb = session.getQueryBuilder();
+    HopsQueryDomainType<BlockLookUpClusterj.BlockLookUpDTO> dobj =
+            qb.createQueryDefinition(BlockLookUpClusterj.BlockLookUpDTO.class);
+    HopsPredicate pred = dobj.get("iNodeId").equal(dobj.param("inodeIdParam"));
+    dobj.where(pred);
+    HopsQuery<BlockLookUpClusterj.BlockLookUpDTO> query = session.createQuery(dobj);
+    query.setParameter("inodeIdParam", inodeID);
+    List<BlockLookUpClusterj.BlockLookUpDTO> dtos = query.getResultList();
+
+    session.deletePersistentAll(dtos);
+    session.release(dtos);
+  }
+
   @Override
   public BlockInfo findById(long blockId, long inodeId) throws StorageException {
     Object[] pk = new Object[2];
@@ -240,21 +282,6 @@ public class BlockInfoClusterj
     return lbis;
   }
 
-  public BlockInfo scanByBlockId(long blockId) throws StorageException {
-    HopsSession session = connector.obtainSession();
-    HopsQueryBuilder qb = session.getQueryBuilder();
-    HopsQueryDomainType<BlockInfoClusterj.BlockInfoDTO> dobj =
-            qb.createQueryDefinition(BlockInfoClusterj.BlockInfoDTO.class);
-    HopsPredicate pred1 = dobj.get("blockId").equal(dobj.param("blockIdParam"));
-    dobj.where(pred1);
-    HopsQuery<BlockInfoClusterj.BlockInfoDTO> query = session.createQuery(dobj);
-    query.setParameter("blockIdParam", blockId);
-    List<BlockInfoDTO> biDtos = query.getResultList();
-    BlockInfo bi = createBlockInfo(biDtos.get(0));
-    session.release(biDtos);
-    return bi;
-  }
-
   @Override
   public List<BlockInfo> findAllBlocks() throws StorageException {
     HopsSession session = connector.obtainSession();
@@ -262,6 +289,25 @@ public class BlockInfoClusterj
     HopsQueryDomainType<BlockInfoClusterj.BlockInfoDTO> dobj =
             qb.createQueryDefinition(BlockInfoClusterj.BlockInfoDTO.class);
     HopsQuery<BlockInfoClusterj.BlockInfoDTO> query = session.createQuery(dobj);
+
+    List<BlockInfoDTO> biDtos = query.getResultList();
+    List<BlockInfo> lbis = createBlockInfoList(biDtos);
+    session.release(biDtos);
+    return lbis;
+  }
+
+  @Override
+  public List<BlockInfo> findAllBlocks(long startID, long endID) throws StorageException {
+    HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
+    HopsQueryDomainType<BlockInfoDTO> qdty = qb.createQueryDefinition(BlockInfoDTO.class);
+    HopsPredicate pred1 = qdty.get("blockId").greaterEqual(qdty.param("blockIdParam1"));
+    HopsPredicate pred2 = qdty.get("blockId").lessThan(qdty.param("blockIdParam2"));
+    qdty.where(pred1.and(pred2));
+
+    HopsQuery<BlockInfoDTO> query = session.createQuery(qdty);
+    query.setParameter("blockIdParam1", startID);
+    query.setParameter("blockIdParam2", endID);
 
     List<BlockInfoDTO> biDtos = query.getResultList();
     List<BlockInfo> lbis = createBlockInfoList(biDtos);
@@ -409,7 +455,8 @@ public class BlockInfoClusterj
             bDTO.getINodeId(), bDTO.getNumBytes(), bDTO.getGenerationStamp(),
             bDTO.getBlockUCState(), bDTO.getTimestamp(),
             bDTO.getPrimaryNodeIndex(), bDTO.getBlockRecoveryId(),
-            bDTO.getTruncateBlockNumBytes(), bDTO.getTruncateBlockGenerationBlock());
+            bDTO.getTruncateBlockNumBytes(), bDTO.getTruncateBlockGenerationBlock(),
+            bDTO.getCloudBucketId());
     return hopBlockInfo;
   }
 
@@ -426,5 +473,6 @@ public class BlockInfoClusterj
     persistable.setBlockRecoveryId(block.getBlockRecoveryId());
     persistable.setTruncateBlockNumBytes(block.getTruncateBlockNumBytes());
     persistable.setTruncateBlockGenerationBlock(block.getTruncateBlockGenerationStamp());
+    persistable.setCloudBucketId(block.getCloudBucketID());
   }
 }

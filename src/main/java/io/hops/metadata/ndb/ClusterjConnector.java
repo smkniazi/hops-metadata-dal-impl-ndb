@@ -299,6 +299,8 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
       cls = ConfMutationClusterJ.ConfMutationDTO.class;
     } else if (className == ConfDataAccess.class) {
       cls = ConfClusterJ.ConfDTO.class;
+    } else if (className == ProvidedBlockReportTasksClusterj.class){
+      cls = ProvidedBlockReportTasksClusterj.class;
     }
 
     HopsSession session = obtainSession();
@@ -352,7 +354,8 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
         AceDataAccess.class, RetryCacheEntryDataAccess.class, CacheDirectiveDataAccess.class,
         CachePoolDataAccess.class, CachedBlockDataAccess.class,
         ActiveBlockReportsDataAccess.class, XAttrDataAccess.class, EncryptionZoneDataAccess.class,
-        FileProvenanceDataAccess.class, FileProvXAttrBufferDataAccess.class);
+	FileProvenanceDataAccess.class, FileProvXAttrBufferDataAccess.class,
+        ProvidedBlockCacheLocDataAccess.class, ProvidedBlockReportTasksClusterj.class);
   }
   
   private boolean formatAll(boolean transactional) throws StorageException {
@@ -541,6 +544,10 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
             truncate(transactional, io.hops.metadata.hdfs.TablesDef.FileProvenanceTableDef.TABLE_NAME);
           }  else if (e == FileProvXAttrBufferDataAccess.class) {
             truncate(transactional, io.hops.metadata.hdfs.TablesDef.FileProvXAttrBufferTableDef.TABLE_NAME);
+          } else if (e == ProvidedBlockCacheLocDataAccess.class){
+            truncate(transactional, io.hops.metadata.hdfs.TablesDef.ProvidedBlockCacheLocTabDef.TABLE_NAME);
+          } else if (e == ProvidedBlockReportTasksClusterj.class){
+            truncate(transactional, io.hops.metadata.hdfs.TablesDef.ProvidedBlockReportTasksTabDef.TABLE_NAME);
           }
         }
         MysqlServerConnector.truncateTable(transactional,
