@@ -354,8 +354,9 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
         AceDataAccess.class, RetryCacheEntryDataAccess.class, CacheDirectiveDataAccess.class,
         CachePoolDataAccess.class, CachedBlockDataAccess.class,
         ActiveBlockReportsDataAccess.class, XAttrDataAccess.class, EncryptionZoneDataAccess.class,
-	FileProvenanceDataAccess.class, FileProvXAttrBufferDataAccess.class,
-        ProvidedBlockCacheLocDataAccess.class, ProvidedBlockReportTasksClusterj.class);
+        ProvidedBlockCacheLocDataAccess.class, ProvidedBlockReportTasksClusterj.class,
+        FileProvenanceDataAccess.class, FileProvXAttrBufferDataAccess.class,
+        CloudBucketDataAccess.class);
   }
   
   private boolean formatAll(boolean transactional) throws StorageException {
@@ -548,6 +549,8 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
             truncate(transactional, io.hops.metadata.hdfs.TablesDef.ProvidedBlockCacheLocTabDef.TABLE_NAME);
           } else if (e == ProvidedBlockReportTasksClusterj.class){
             truncate(transactional, io.hops.metadata.hdfs.TablesDef.ProvidedBlockReportTasksTabDef.TABLE_NAME);
+          } else if (e == CloudBucketDataAccess.class) {
+            truncate(transactional, io.hops.metadata.hdfs.TablesDef.CloudBucketsTabDef.TABLE_NAME);
           }
         }
         MysqlServerConnector.truncateTable(transactional,
