@@ -38,6 +38,7 @@ make -j$(expr $(nproc))
 
 #deploy clusterj to kompics repo
 mvn deploy:deploy-file -Dfile=storage/ndb/clusterj/clusterj-"$V".jar -DgroupId=com.mysql.ndb -DartifactId=clusterj-hops-fix -Dversion=$V -Dpackaging=jar -DrepositoryId=Hops -Durl=https://bbc1.sics.se/archiva/repository/Hops
+mvn deploy:deploy-file -Dfile=storage/ndb/clusterj/clusterj-"$V".jar -DgroupId=com.mysql.ndb -DartifactId=clusterj-hops-fix -Dversion=$V -Dpackaging=jar -DrepositoryId=HopsEE -Durl=https://archive.logicalclocks.com/repository/hops-artifacts
 
 #deploy libndbclient to kompics
 cd $SRC/../../

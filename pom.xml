@@ -49,22 +49,14 @@
 
   <repositories>
     <repository>
-      <id>Hops release</id>
+      <id>HopsEE</id>
       <name>Hops Release Repository</name>
-      <url>https://archiva.hops.works/repository/Hops/</url>
-      <snapshots>
-        <enabled>false</enabled>
-        <updatePolicy>never</updatePolicy>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>hops-snapshot-repository</id>
-      <name>Hops Snapshot Repository</name>
-      <url>https://archiva.hops.works/repository/Hops/</url>
+      <url>https://archive.logicalclocks.com/repository/hops-artifacts</url>
       <releases>
         <enabled>true</enabled>
       </releases>
       <snapshots>
+        <enabled>true</enabled>
         <updatePolicy>always</updatePolicy>
       </snapshots>
     </repository>
@@ -127,9 +119,9 @@
   
   <distributionManagement>
     <repository>
-      <id>Hops</id>
+      <id>HopsEE</id>
       <name>Hops Repo</name>
-      <url>https://archiva.hops.works/repository/Hops/</url>
+      <url>https://archive.logicalclocks.com/repository/hops-artifacts</url>
       <releases>
         <enabled>true</enabled>
       </releases>
