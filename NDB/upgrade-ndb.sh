@@ -37,8 +37,8 @@ cmake .. -DBUILD_CONFIG=mysql_release -DCPACK_MONOLITHIC_INSTALL=true -DDOWNLOAD
 make -j$(expr $(nproc))
 
 #deploy clusterj to kompics repo
-mvn deploy:deploy-file -Dfile=storage/ndb/clusterj/clusterj-"$V".jar -DgroupId=com.mysql.ndb -DartifactId=clusterj-hops-fix -Dversion=$V -Dpackaging=jar -DrepositoryId=Hops -Durl=https://bbc1.sics.se/archiva/repository/Hops
-mvn deploy:deploy-file -Dfile=storage/ndb/clusterj/clusterj-"$V".jar -DgroupId=com.mysql.ndb -DartifactId=clusterj-hops-fix -Dversion=$V -Dpackaging=jar -DrepositoryId=HopsEE -Durl=https://archive.logicalclocks.com/repository/hops-artifacts
+mvn deploy:deploy-file -Dfile=storage/ndb/clusterj/clusterj-"$V".jar -DgroupId=com.mysql.ndb -DartifactId=clusterj-hops-fix -Dversion=$V -Dpackaging=jar -DrepositoryId=Hops -Durl=https://archiva.hops.works/repository/Hops
+mvn deploy:deploy-file -Dfile=storage/ndb/clusterj/clusterj-"$V".jar -DgroupId=com.mysql.ndb -DartifactId=clusterj-hops-fix -Dversion=$V -Dpackaging=jar -DrepositoryId=HopsEE -Durl=https://nexus.hops.works/repository/hops-artifacts
 
 #deploy libndbclient to kompics
 cd $SRC/../../
