@@ -148,6 +148,7 @@ public class NdbStorageFactory implements DalStorageFactory {
     dataAccessMap.put(ProvidedBlockReportTasksDataAccess.class,
             new ProvidedBlockReportTasksClusterj());
     dataAccessMap.put(CloudBucketDataAccess.class, new CloudBucketsClusterj());
+    dataAccessMap.put(LeaseCreationLocksDataAccess.class, new LeaseCreationLocksClusterj());
   }
 
   @Override
