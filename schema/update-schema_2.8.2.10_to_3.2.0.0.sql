@@ -42,9 +42,7 @@ DROP TABLE `yarn_containers_logs`;
 
 DROP TABLE `yarn_containers_checkpoint`;
 
-insert into hdfs_variables (id, value) select 37, "" where (select count(*) from hdfs_variables)>0;
-
-insert into hdfs_variables (id, value) select 38, "" where (select count(*) from hdfs_variables)>0;
+insert into hdfs_variables (id, value) select 39, "" where (select count(*) from hdfs_variables)>0;
 
 ALTER TABLE `hdfs_xattrs`
 ADD COLUMN `num_parts` smallint(6) NOT NULL DEFAULT '1',
@@ -85,4 +83,6 @@ ALTER TABLE hdfs_retry_cache_entry DROP PRIMARY KEY;
 
 ALTER TABLE hdfs_retry_cache_entry ADD PRIMARY KEY (`client_id`,`call_id`,`epoch`) PARTITION BY KEY (`epoch`);
 
-insert into hdfs_variables (id, value) select 39, 0x0000000000000000 where (select count(*) from hdfs_variables)>0;
+insert into hdfs_variables (id, value) select 40, 0x0000000000000000 where (select count(*) from hdfs_variables)>0;
+
+insert into hdfs_variables (id, value) select 41, "" where (select count(*) from hdfs_variables)>0;
