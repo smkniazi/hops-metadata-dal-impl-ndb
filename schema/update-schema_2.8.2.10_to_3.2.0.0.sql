@@ -86,3 +86,7 @@ ALTER TABLE hdfs_retry_cache_entry ADD PRIMARY KEY (`client_id`,`call_id`,`epoch
 insert into hdfs_variables (id, value) select 40, 0x0000000000000000 where (select count(*) from hdfs_variables)>0;
 
 insert into hdfs_variables (id, value) select 41, "" where (select count(*) from hdfs_variables)>0;
+
+TRUNCATE TABLE hdfs_le_descriptors;
+
+TRUNCATE TABLE yarn_le_descriptors;
