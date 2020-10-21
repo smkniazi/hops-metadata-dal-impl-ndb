@@ -33,11 +33,10 @@ patch -p1 < clusterj-fix.patch
 BLD=$TMP/mysql-cluster-gpl-"$V"/bld
 mkdir $BLD
 cd $BLD
-cmake .. -DBUILD_CONFIG=mysql_release -DCPACK_MONOLITHIC_INSTALL=true -DDOWNLOAD_BOOST=1 -DWITH_BOOST=/tmp
+cmake .. -DBUILD_CONFIG=mysql_release -DCPACK_MONOLITHIC_INSTALL=true -DDOWNLOAD_BOOST=1 -DWITH_BOOST=/tmp -DWITH_NDB_JAVA=ON -DWITH_NDBCLUSTER=ON
 make -j$(expr $(nproc))
 
 #deploy clusterj to kompics repo
-mvn deploy:deploy-file -Dfile=storage/ndb/clusterj/clusterj-"$V".jar -DgroupId=com.mysql.ndb -DartifactId=clusterj-hops-fix -Dversion=$V -Dpackaging=jar -DrepositoryId=Hops -Durl=https://archiva.hops.works/repository/Hops
 mvn deploy:deploy-file -Dfile=storage/ndb/clusterj/clusterj-"$V".jar -DgroupId=com.mysql.ndb -DartifactId=clusterj-hops-fix -Dversion=$V -Dpackaging=jar -DrepositoryId=HopsEE -Durl=https://nexus.hops.works/repository/hops-artifacts
 
 #deploy libndbclient to kompics
